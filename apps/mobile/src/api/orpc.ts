@@ -2,12 +2,16 @@ import { createORPCClient, onError } from '@orpc/client'
 import { RPCLink } from '@orpc/client/fetch'
 import { createTanstackQueryUtils } from '@orpc/tanstack-query'
 import type { AppRouterClient } from '@folio/api'
+import {
+  signInWithEmail,
+  signUpWithEmail,
+  signOutWithBearer,
+} from '@folio/api/auth-bearer'
 
 const SESSION_KEY = 'folio_session'
 
 export function getSessionToken(): string | null {
   try {
-    // AsyncStorage would be better; localStorage polyfill / memory for now
     return globalThis.localStorage?.getItem(SESSION_KEY) ?? null
   } catch {
     return null
@@ -43,3 +47,27 @@ export const link = new RPCLink({
 
 export const client: AppRouterClient = createORPCClient(link)
 export const orpc = createTanstackQueryUtils(client)
+
+/** Minimal better-auth sign-in helper (no full login UI in phase 1). */
+export async function authSignIn(email: string, password: string) {
+  const { token, user } = await signInWithEmail(getApiBase(), email, password)
+  setSessionToken(token)
+  return user
+}
+
+export async function authSignUp(name: string, email: string, password: string) {
+  const { token, user } = await signUpWithEmail(getApiBase(), { name, email, password })
+  setSessionToken(token)
+  return user
+}
+
+export async function authSignOut() {
+  const token = getSessionToken()
+  if (token) {
+    try {
+      await signOutWithBearer(getApiBase(), token)
+    } finally {
+      setSessionToken(null)
+    }
+  }
+}
