@@ -33,6 +33,10 @@ export default createApp({
         target: 'http://localhost:4000',
         changeOrigin: true,
       },
+      '/api/auth': {
+        target: 'http://localhost:4000',
+        changeOrigin: true,
+      },
     },
   },
   routers: [

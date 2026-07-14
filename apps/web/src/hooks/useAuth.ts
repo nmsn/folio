@@ -1,58 +1,43 @@
-import { useState, useEffect } from 'react'
-import { client, setSessionToken, getSessionToken } from '../lib/orpc'
-
-interface User {
-  id: string
-  email: string
-  name: string
-}
+import { useSession, signIn, signUp, signOut } from '../lib/auth-client'
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { data, isPending, error, refetch } = useSession()
 
-  const checkSession = async () => {
-    try {
-      if (!getSessionToken()) {
-        setUser(null)
-        return
+  const user = data?.user
+    ? {
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.name,
+        image: data.user.image ?? null,
       }
-      const res = await client.auth.getSession()
-      setUser(res.user)
-    } catch {
-      setUser(null)
-      setSessionToken(null)
-    } finally {
-      setLoading(false)
-    }
-  }
+    : null
 
   const signin = async (email: string, password: string) => {
-    const res = await client.auth.signin({ email, password })
-    setSessionToken(res.session.sessionId)
-    setUser(res.user)
-    return res.user
-  }
-
-  const signout = async () => {
-    try {
-      await client.auth.signout()
-    } finally {
-      setSessionToken(null)
-      setUser(null)
-    }
+    const res = await signIn.email({ email, password })
+    if (res.error) throw new Error(res.error.message || 'Sign in failed')
+    await refetch()
+    return res.data?.user
   }
 
   const signup = async (name: string, email: string, password: string) => {
-    const res = await client.auth.signup({ name, email, password })
-    setSessionToken(res.session.sessionId)
-    setUser(res.user)
-    return res.user
+    const res = await signUp.email({ name, email, password })
+    if (res.error) throw new Error(res.error.message || 'Sign up failed')
+    await refetch()
+    return res.data?.user
   }
 
-  useEffect(() => {
-    checkSession()
-  }, [])
+  const logout = async () => {
+    await signOut()
+    await refetch()
+  }
 
-  return { user, loading, signin, signout, signup }
+  return {
+    user,
+    loading: isPending,
+    error,
+    signin,
+    signup,
+    signout: logout,
+    refetch,
+  }
 }

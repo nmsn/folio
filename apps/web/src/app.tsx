@@ -1,17 +1,41 @@
 import React, { useMemo, useState } from 'react'
 import { FolioThreeColumnLayout } from './components/FolioThreeColumnLayout'
+import { AuthScreen } from './components/AuthScreen'
 import { useFeeds, useCreateFeed, useRefreshFeed } from './hooks/useFeeds'
 import { useArticles, useArticle } from './hooks/useArticles'
 import { useArticleState } from './hooks/useArticleState'
 import { useGroupedFeeds, type Feed } from './hooks/useGroupedFeeds'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
+import { useAuth } from './hooks/useAuth'
 import { FolioSidebar } from './components/FolioSidebar'
 import { FolioArticleList, type ArticleItem } from './components/FolioArticleList'
 import { FolioReader } from './components/FolioReader'
 
 function App() {
-  // TODO(auth-ui): wire useAuth() once login/signup UI exists (session token via orpc helpers).
+  const { user, loading: authLoading, signin, signup, signout } = useAuth()
 
+  if (authLoading) {
+    return (
+      <div className="auth-screen">
+        <p className="auth-sub">加载会话…</p>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <AuthScreen onSignIn={signin} onSignUp={signup} />
+  }
+
+  return <ReaderApp userName={user.name} onSignOut={signout} />
+}
+
+function ReaderApp({
+  userName,
+  onSignOut,
+}: {
+  userName: string
+  onSignOut: () => Promise<void>
+}) {
   // data
   const {
     data: feedsRaw = [],
@@ -135,6 +159,8 @@ function App() {
             setSelectedArticleId(null)
           }}
           onAddFeed={() => setShowAddFeed(true)}
+          userName={userName}
+          onSignOut={() => void onSignOut()}
         />
         <FolioArticleList
           articles={sortedArticles}
