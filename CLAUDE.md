@@ -9,8 +9,8 @@ folio 是一个基于 AI 的 RSS 阅读器，支持稍后阅读功能。
 - **Monorepo**: pnpm + Turbo
 - **前端**: React 18, TanStack Router/Start, Tailwind CSS
 - **UI 组件**: @folio/ui (内部包)
-- **数据库**: Drizzle ORM + PostgreSQL 16 (本地 docker: postgres:16-alpine, 端口 5432)
-- **API**: Nitro (via Vinxi)
+- **数据库**: Drizzle ORM + Cloudflare D1 (SQLite)
+- **API**: NestJS（迁移中 → Hono + ORPC）
 - **桌面端**: TBD
 - **移动端**: TBD
 - **浏览器扩展**: TBD

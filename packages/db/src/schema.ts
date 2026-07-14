@@ -1,6 +1,6 @@
-import { pgTable, text, integer, index, uniqueIndex } from 'drizzle-orm/pg-core'
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
-export const users = pgTable('users', {
+export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
   name: text('name').notNull(),
@@ -10,7 +10,7 @@ export const users = pgTable('users', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 })
 
-export const sessions = pgTable('sessions', {
+export const sessions = sqliteTable('sessions', {
   id: text('id').primaryKey(),
   userId: text('user_id')
     .notNull()
@@ -19,7 +19,7 @@ export const sessions = pgTable('sessions', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 })
 
-export const rssSources = pgTable('rss_sources', {
+export const rssSources = sqliteTable('rss_sources', {
   id: text('id').primaryKey(),
   userId: text('user_id')
     .notNull()
@@ -29,13 +29,13 @@ export const rssSources = pgTable('rss_sources', {
   description: text('description'),
   iconUrl: text('icon_url'),
   category: text('category'),
-  isActive: text('is_active').default('true'),
+  isActive: integer('is_active', { mode: 'boolean' }).default(true),
   lastFetchedAt: integer('last_fetched_at', { mode: 'timestamp' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 })
 
-export const articles = pgTable('articles', {
+export const articles = sqliteTable('articles', {
   id: text('id').primaryKey(),
   sourceId: text('source_id')
     .notNull()
@@ -51,7 +51,7 @@ export const articles = pgTable('articles', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 })
 
-export const readingItems = pgTable('reading_items', {
+export const readingItems = sqliteTable('reading_items', {
   id: text('id').primaryKey(),
   userId: text('user_id')
     .notNull()
@@ -66,7 +66,7 @@ export const readingItems = pgTable('reading_items', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 })
 
-export const aiAnnotations = pgTable('ai_annotations', {
+export const aiAnnotations = sqliteTable('ai_annotations', {
   id: text('id').primaryKey(),
   readingItemId: text('reading_item_id')
     .notNull()

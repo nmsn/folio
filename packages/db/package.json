@@ -3,34 +3,27 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     },
-    "./client": {
-      "types": "./dist/client.d.ts",
-      "default": "./dist/client.js"
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./src/*.ts"
     }
   },
   "scripts": {
-    "generate": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate",
-    "studio": "drizzle-kit studio",
-    "build": "tsup",
-    "dev": "tsup --watch",
+    "generate": "drizzle-kit generate --config drizzle.config.ts",
+    "migrate": "drizzle-kit migrate --config drizzle.config.ts",
+    "studio": "drizzle-kit studio --config drizzle.config.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@libsql/client": "^0.14.0",
     "drizzle-orm": "catalog:"
   },
   "devDependencies": {
     "drizzle-kit": "catalog:",
-    "tsup": "catalog:",
     "typescript": "catalog:"
   }
 }
