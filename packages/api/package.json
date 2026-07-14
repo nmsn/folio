@@ -27,6 +27,7 @@
     "@orpc/client": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/tanstack-query": "catalog:",
+    "better-auth": "catalog:",
     "drizzle-orm": "catalog:",
     "hono": "catalog:",
     "zod": "catalog:"

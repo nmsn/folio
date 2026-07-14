@@ -9,19 +9,20 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@folio/api": "workspace:*",
     "@folio/ui": "workspace:*",
+    "@orpc/client": "catalog:",
+    "@orpc/tanstack-query": "catalog:",
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@tanstack/react-start": "catalog:",
+    "better-auth": "catalog:",
     "clsx": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "tailwind-merge": "catalog:",
     "vinxi": "catalog:",
-    "zod": "catalog:",
-    "@folio/api": "workspace:*",
-    "@orpc/client": "catalog:",
-    "@orpc/tanstack-query": "catalog:"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@folio/tsconfig": "workspace:*",
