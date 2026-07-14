@@ -5,30 +5,39 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./lib/utils": "./src/lib/utils.ts",
-    "./styles/globals.css": "./src/styles/globals.css"
+    "./components/*": "./src/components/*.tsx",
+    "./lib/*": "./src/lib/*.ts",
+    "./styles/*": "./src/styles/*"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "add": "pnpm dlx shadcn@latest add $@ -c ."
+    "add": "pnpm dlx shadcn@latest add"
   },
   "peerDependencies": {
     "react": "catalog:",
     "react-dom": "catalog:"
   },
   "dependencies": {
+    "@radix-ui/react-alert-dialog": "catalog:",
+    "@radix-ui/react-checkbox": "catalog:",
     "@radix-ui/react-dialog": "catalog:",
+    "@radix-ui/react-label": "catalog:",
+    "@radix-ui/react-progress": "catalog:",
     "@radix-ui/react-slot": "catalog:",
+    "@radix-ui/react-tooltip": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
-    "tailwind-merge": "catalog:"
+    "lucide-react": "catalog:",
+    "radix-ui": "^1.6.2",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "catalog:",
+    "tailwindcss": "catalog:",
+    "tw-animate-css": "catalog:"
   },
   "devDependencies": {
-    "@folio/tailwindcss": "workspace:*",
     "@folio/tsconfig": "workspace:*",
     "@types/react": "catalog:",
-    "lucide-react": "catalog:",
-    "tailwindcss": "catalog:",
+    "@types/react-dom": "catalog:",
     "typescript": "catalog:"
   }
 }

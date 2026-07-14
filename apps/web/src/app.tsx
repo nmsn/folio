@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { FolioThreeColumnLayout } from '@folio/ui'
+import { FolioThreeColumnLayout } from './components/FolioThreeColumnLayout'
 import { useFeeds, useCreateFeed, useRefreshFeed } from './hooks/useFeeds'
 import { useArticles, useArticle } from './hooks/useArticles'
 import { useArticleState } from './hooks/useArticleState'

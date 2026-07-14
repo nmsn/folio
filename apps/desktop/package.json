@@ -11,7 +11,6 @@
   "dependencies": {
     "@folio/api-client": "workspace:*",
     "@folio/shared": "workspace:*",
-    "@folio/tailwindcss": "workspace:*",
     "@folio/ui": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "electron-vite": "^2.3.0",

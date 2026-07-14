@@ -1,0 +1,104 @@
+@import "tailwindcss";
+@source "../../../apps/web/src/**/*.{ts,tsx}";
+@source "../../../apps/desktop/src/**/*.{ts,tsx}";
+@source "../../../apps/extension/src/**/*.{ts,tsx}";
+@source "../**/*.{ts,tsx}";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --width-nav: var(--col-nav);
+  --width-list: var(--col-list);
+  --width-read: var(--col-read);
+}
+
+:root {
+  /* Folio brand → shadcn tokens */
+  --radius: 0.5rem;
+  --background: oklch(98.5% 0.005 85);
+  --foreground: oklch(22% 0.012 70);
+  --card: oklch(99.6% 0.002 85);
+  --card-foreground: oklch(22% 0.012 70);
+  --popover: oklch(99.6% 0.002 85);
+  --popover-foreground: oklch(22% 0.012 70);
+  --primary: oklch(62% 0.16 38);
+  --primary-foreground: oklch(99% 0.005 85);
+  --secondary: oklch(97.2% 0.006 85);
+  --secondary-foreground: oklch(22% 0.012 70);
+  --muted: oklch(97.2% 0.006 85);
+  --muted-foreground: oklch(52% 0.012 70);
+  /* Folio brand uses terracotta as accent (also drives shadcn accent surfaces) */
+  --accent: oklch(62% 0.16 38);
+  --accent-foreground: oklch(99% 0.005 85);
+  --destructive: oklch(57.7% 0.245 27.325);
+  --border: oklch(89% 0.008 85);
+  --input: oklch(89% 0.008 85);
+  --ring: oklch(62% 0.16 38);
+
+  /* Folio extended tokens (legacy CSS class API) */
+  --bg: var(--background);
+  --surface: var(--card);
+  --surface-2: oklch(97.2% 0.006 85);
+  --fg: var(--foreground);
+  --fg-2: oklch(38% 0.012 70);
+  --muted-2: oklch(65% 0.01 70);
+  --border-2: oklch(82% 0.01 85);
+  --accent-hover: oklch(56% 0.17 35);
+  --accent-soft: oklch(95% 0.035 40);
+  --accent-ink: oklch(99% 0.005 85);
+  --read: oklch(70% 0.008 70);
+  --star: oklch(72% 0.14 75);
+  --font-display:
+    "Iowan Old Style", "Charter", "Source Serif Pro", Georgia, "Songti SC", "STSong", serif;
+  --font-ui:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB",
+    system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --r-xs: 4px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --col-nav: 264px;
+  --col-list: 392px;
+  --col-read: min(720px, 100%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font: 14px / 1.55 var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    min-height: 100vh;
+  }
+  button:not([disabled]),
+  [role="button"]:not([disabled]) {
+    cursor: pointer;
+  }
+}

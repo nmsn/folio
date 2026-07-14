@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './app'
+import '@folio/ui/styles/globals.css'
 import './app.css'
 
 const queryClient = new QueryClient({
