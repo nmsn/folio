@@ -7,13 +7,14 @@ folio 是一个基于 AI 的 RSS 阅读器，支持稍后阅读功能。
 ## 技术栈
 
 - **Monorepo**: pnpm + Turbo
-- **前端**: React 18, TanStack Router/Start, Tailwind CSS
-- **UI 组件**: @folio/ui (内部包)
+- **前端**: React 19, TanStack Router/Start, Tailwind CSS v4 + shadcn
+- **UI 组件**: @folio/ui (shadcn)
 - **数据库**: Drizzle ORM + Cloudflare D1 (SQLite)
-- **API**: Hono + ORPC on Cloudflare Workers
-- **桌面端**: TBD
-- **移动端**: TBD
-- **浏览器扩展**: TBD
+- **API**: Hono + ORPC on Cloudflare Workers (Alchemy)
+- **部署**: Alchemy.run + GitHub Actions（web 仍 Vinxi 自托管）
+- **桌面端**: Electron
+- **移动端**: Expo
+- **浏览器扩展**: WXT
 
 ## 应用结构
 
