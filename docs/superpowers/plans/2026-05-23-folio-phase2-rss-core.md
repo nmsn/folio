@@ -1,4 +1,4 @@
-# FeedMind Phase 2: RSS Core Implementation Plan
+# folio Phase 2: RSS Core Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -298,7 +298,7 @@ export interface FetchFeedResult {
 
 export async function fetchFeed(url: string, options: FetchFeedOptions = {}): Promise<FetchFeedResult> {
   const headers: Record<string, string> = {
-    'User-Agent': 'FeedMind/1.0 RSS Reader',
+    'User-Agent': 'folio/1.0 RSS Reader',
     'Accept': 'application/rss+xml, application/xml, text/xml, application/atom+xml',
   };
 
@@ -811,7 +811,7 @@ export interface FulltextResult {
 export async function extractFulltext(url: string): Promise<FulltextResult> {
   const response = await got(url, {
     headers: {
-      'User-Agent': 'FeedMind/1.0 RSS Reader',
+      'User-Agent': 'folio/1.0 RSS Reader',
       'Accept': 'text/html',
     },
     timeout: { request: 30000 },
@@ -916,7 +916,7 @@ git commit -m "feat(api): add feed refresh endpoint"
 
 ---
 
-**Plan saved to `docs/superpowers/plans/2026-05-23-feedmind-phase2-rss-core.md`**
+**Plan saved to `docs/superpowers/plans/2026-05-23-folio-phase2-rss-core.md`**
 
 ## Two Execution Options:
 

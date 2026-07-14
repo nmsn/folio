@@ -1,4 +1,4 @@
-name: feed-mind-dev
+name: folio-dev
 
 services:
   db:
@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
-      POSTGRES_DB: feedmind
+      POSTGRES_DB: folio
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:

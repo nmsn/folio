@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import { CreateRSSSourceSchema } from '@feed-mind/shared/schemas';
+import { CreateRSSSourceSchema } from '@folio/shared/schemas';
 
 export const feedsApi = {
   list: () => apiClient.get('/feeds'),

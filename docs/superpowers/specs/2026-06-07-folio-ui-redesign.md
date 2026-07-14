@@ -87,7 +87,7 @@
 
 ## 布局架构
 
-### 替换 `@feed-mind/ui` 的 `ThreeColumnLayout` 系列
+### 替换 `@folio/ui` 的 `ThreeColumnLayout` 系列
 
 设计稿的三列是**grid 布局**（不是当前 packages/ui 的 flex）。两种选择：
 - **A. 在 packages/ui 新增 `FolioThreeColumnLayout`**（继承 ThreeColumnLayout 但用 grid）
@@ -298,7 +298,7 @@ export const MOCK_AI_SUMMARIES: Record<string, { tldr, points, saved, source }> 
 **新增 `apps/web/src/hooks/useArticleState.ts`**（localStorage backed）：
 
 ```ts
-const KEY = 'feedmind.articleState.v1';
+const KEY = 'folio.articleState.v1';
 // state: { [articleId]: { read: boolean, starred: boolean } }
 
 export function useArticleState() {

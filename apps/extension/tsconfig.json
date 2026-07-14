@@ -1,12 +1,12 @@
 {
-  "extends": ["@feed-mind/tsconfig/react"],
+  "extends": ["@folio/tsconfig/react"],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"],
-      "@feed-mind/shared/*": ["../../packages/shared/src/*"],
-      "@feed-mind/ui/*": ["../../packages/ui/src/*"],
-      "@feed-mind/tailwindcss/*": ["../../packages/tailwindcss/*"]
+      "@folio/shared/*": ["../../packages/shared/src/*"],
+      "@folio/ui/*": ["../../packages/ui/src/*"],
+      "@folio/tailwindcss/*": ["../../packages/tailwindcss/*"]
     }
   },
   "include": ["src"],

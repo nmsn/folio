@@ -8,7 +8,7 @@ export default defineSidebar({
   devUrl: 'http://localhost:5173',
   onMount(sidebar) {
     const root = document.createElement('div');
-    root.id = 'feedmind-root';
+    root.id = 'folio-root';
     sidebar.append(root);
     createRoot(root).render(<Sidepanel />);
   },

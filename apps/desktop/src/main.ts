@@ -18,6 +18,6 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
-  app.setAppUserModelId('com.feedmind.desktop');
+  app.setAppUserModelId('com.folio.desktop');
   createWindow();
 });

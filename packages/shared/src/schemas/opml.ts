@@ -99,7 +99,7 @@ export function parseOPML(xmlString: string): OPML {
     : '';
 
   const head: OPMLHead = {
-    title: getElementContent(headContent, 'title') || 'FeedMind Subscriptions',
+    title: getElementContent(headContent, 'title') || 'folio Subscriptions',
     dateCreated: getElementContent(headContent, 'dateCreated'),
     dateModified: getElementContent(headContent, 'dateModified'),
     ownerName: getElementContent(headContent, 'ownerName'),

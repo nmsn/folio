@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { nowSec, toUnixSeconds } from '../database/now-sec';
-import type { Cursor } from '@feed-mind/shared';
+import type { Cursor } from '@folio/shared';
 
 @Injectable()
 export class ArticlesRepository {

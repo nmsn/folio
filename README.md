@@ -1,4 +1,4 @@
-# FeedMind
+# folio
 
 Multi-end RSS reader + AI assistance + read-later tool.
 
@@ -18,7 +18,7 @@ Multi-end RSS reader + AI assistance + read-later tool.
 ## Project Structure
 
 ```
-feed-mind/
+folio/
 ├── apps/
 │   ├── web/          # Tanstack Start frontend
 │   ├── mobile/       # Expo React Native

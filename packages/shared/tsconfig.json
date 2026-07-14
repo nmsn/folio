@@ -1,5 +1,5 @@
 {
-  "extends": ["@feed-mind/tsconfig/node"],
+  "extends": ["@folio/tsconfig/node"],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ArticlesRepository } from './articles.repository';
 import { RssService } from '../rss/rss.service';
-import { createPaginatedResponse, type Cursor } from '@feed-mind/shared';
+import { createPaginatedResponse, type Cursor } from '@folio/shared';
 
 @Injectable()
 export class ArticlesService {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { apiClient } from '@feed-mind/api-client';
+import { apiClient } from '@folio/api-client';
 
 interface User {
   id: string;

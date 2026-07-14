@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss';
-import sharedConfig from '@feed-mind/tailwindcss/theme.json';
+import sharedConfig from '@folio/tailwindcss/theme.json';
 
 export default {
   content: ['./src/**/*.{js,jsx,ts,tsx}'],

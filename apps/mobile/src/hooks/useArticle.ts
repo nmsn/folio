@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { articlesApi } from '@feed-mind/api-client';
+import { articlesApi } from '@folio/api-client';
 
 export function useArticle(id: string) {
   return useQuery({

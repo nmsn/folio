@@ -3,7 +3,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b">
         <nav className="container mx-auto flex items-center justify-between p-4">
-          <h1 className="text-xl font-bold">FeedMind</h1>
+          <h1 className="text-xl font-bold">folio</h1>
           <div className="flex gap-4">
             <a href="/login" className="text-sm hover:underline">Login</a>
             <a href="/register" className="text-sm hover:underline">Register</a>

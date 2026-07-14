@@ -12,7 +12,7 @@ export interface FulltextResult {
 export async function extractFulltext(url: string): Promise<FulltextResult> {
   const response = await got(url, {
     headers: {
-      'User-Agent': 'FeedMind/1.0 RSS Reader',
+      'User-Agent': 'folio/1.0 RSS Reader',
       'Accept': 'text/html',
     },
     timeout: { request: 30000 },

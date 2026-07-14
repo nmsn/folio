@@ -4,7 +4,7 @@ import {
   CursorPaginationInputSchema,
   createPaginatedResponse,
   ArticleListWithCursorSchema,
-} from '@feed-mind/shared';
+} from '@folio/shared';
 
 describe('Cursor Schema', () => {
   it('should validate correct cursor', () => {

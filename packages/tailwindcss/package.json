@@ -1,5 +1,5 @@
 {
-  "name": "@feed-mind/tailwindcss",
+  "name": "@folio/tailwindcss",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -12,7 +12,7 @@
     "tailwindcss": "^3.4.0"
   },
   "devDependencies": {
-    "@feed-mind/tsconfig": "workspace:*",
+    "@folio/tsconfig": "workspace:*",
     "typescript": "^5.6.0"
   }
 }

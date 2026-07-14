@@ -1,4 +1,4 @@
-import { ApiClient } from '@feed-mind/api-client';
+import { ApiClient } from '@folio/api-client';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 

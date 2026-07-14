@@ -1,11 +1,11 @@
-# FeedMind Design Specification
+# folio Design Specification
 
 **Date:** 2026-05-23
 **Status:** Draft
 
 ## Overview
 
-**FeedMind** is a multi-end RSS reader + AI assistance + read-later tool designed for independent developers and power users who want full control over their data.
+**folio** is a multi-end RSS reader + AI assistance + read-later tool designed for independent developers and power users who want full control over their data.
 
 **Core Features:**
 - RSS subscription management with intelligent content aggregation
@@ -46,7 +46,7 @@
 ### Monorepo Structure
 
 ```
-feed-mind/
+folio/
 ├── apps/
 │   ├── web/           # Tanstack Start frontend
 │   ├── mobile/        # Expo React Native
