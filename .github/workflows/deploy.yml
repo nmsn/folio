@@ -1,0 +1,66 @@
+name: Deploy Application
+
+# Automated Alchemy deploy for Folio.
+# Secrets (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN, CLOUDFLARE_EMAIL, ALCHEMY_STATE_TOKEN
+#   ENV_SERVER_DEV / ENV_SERVER_PROD  (full apps/api/.env contents)
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Inject Environment Files (Dev)
+        if: github.ref == 'refs/heads/dev'
+        run: echo "${{ secrets.ENV_SERVER_DEV }}" > apps/api/.env
+
+      - name: Inject Environment Files (Prod)
+        if: github.ref == 'refs/heads/main'
+        run: echo "${{ secrets.ENV_SERVER_PROD }}" > apps/api/.env
+
+      - name: Deploy to Dev
+        if: github.ref == 'refs/heads/dev'
+        run: pnpm --filter @folio/server deploy:dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+          ALCHEMY_STATE_TOKEN: ${{ secrets.ALCHEMY_STATE_TOKEN }}
+
+      - name: Deploy to Prod
+        if: github.ref == 'refs/heads/main'
+        run: pnpm --filter @folio/server deploy:prod
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+          ALCHEMY_STATE_TOKEN: ${{ secrets.ALCHEMY_STATE_TOKEN }}

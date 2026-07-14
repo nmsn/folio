@@ -16,6 +16,8 @@
     "db:studio": "pnpm --filter @folio/db studio",
     "dev:web": "pnpm --filter @folio/web dev",
     "dev:api": "pnpm --filter @folio/server dev",
+    "deploy:dev": "pnpm --filter @folio/server deploy:dev",
+    "deploy:prod": "pnpm --filter @folio/server deploy:prod",
     "dev:desktop": "pnpm --filter @folio/desktop dev",
     "dev:mobile": "pnpm --filter @folio/mobile dev",
     "dev:extension": "pnpm --filter @folio/extension dev"
