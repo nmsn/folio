@@ -4,12 +4,12 @@ export interface DayGroup<T> {
 }
 
 /**
- * 将文章列表按 published_at 字段分组成 day bucket。
- * 排序：按 published_at 降序。
+ * 将文章列表按 publishedAt 字段分组成 day bucket。
+ * 排序：按 publishedAt 降序。
  * 分组 key：今天 / 昨天 / 早 X 天 / 本周更早 / 更早。
  * 适用于已经按时间倒序排列的列表。
  */
-export function groupArticlesByDay<T extends { published_at: string | number | Date }>(
+export function groupArticlesByDay<T extends { publishedAt: string | number | Date }>(
   articles: T[],
 ): DayGroup<T>[] {
   if (articles.length === 0) return []
@@ -23,7 +23,7 @@ export function groupArticlesByDay<T extends { published_at: string | number | D
   const order: string[] = []
 
   for (const a of articles) {
-    const date = a.published_at instanceof Date ? a.published_at : new Date(a.published_at)
+    const date = a.publishedAt instanceof Date ? a.publishedAt : new Date(a.publishedAt)
     const t = date.getTime()
     if (Number.isNaN(t)) continue
 

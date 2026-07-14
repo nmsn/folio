@@ -85,8 +85,8 @@ function App() {
   const sortedArticles = useMemo(
     () =>
       [...articleList].sort((a, b) => {
-        const ta = new Date(a.published_at as string | number | Date).getTime()
-        const tb = new Date(b.published_at as string | number | Date).getTime()
+        const ta = new Date(a.publishedAt as string | number | Date).getTime()
+        const tb = new Date(b.publishedAt as string | number | Date).getTime()
         return tb - ta
       }),
     [articleList],
@@ -176,7 +176,7 @@ function App() {
           }
           nextFeedName={
             sortedIdx >= 0 && sortedIdx < sortedArticles.length - 1
-              ? feedNameMap[(sortedArticles[sortedIdx + 1] as ArticleItem)?.source_id ?? '']
+              ? feedNameMap[(sortedArticles[sortedIdx + 1] as ArticleItem)?.sourceId ?? '']
               : undefined
           }
         />

@@ -4,11 +4,12 @@ import { groupArticlesByDay, type DayGroup } from '../utils/group-articles-by-da
 
 export interface ArticleItem {
   id: string
-  source_id?: string
+  sourceId?: string
   title: string
   author?: string | null
-  published_at: string | number | Date
+  publishedAt: string | number | Date
   description?: string | null
+  content?: string | null
 }
 
 interface FolioArticleListProps {
@@ -57,7 +58,7 @@ export function FolioArticleList({
   const groups: DayGroup<ArticleItem>[] = useMemo(() => groupArticlesByDay(filtered), [filtered])
 
   const sourceCount = useMemo(
-    () => new Set(filtered.map((a) => a.source_id).filter(Boolean)).size,
+    () => new Set(filtered.map((a) => a.sourceId).filter(Boolean)).size,
     [filtered],
   )
   const unreadInFiltered = filtered.filter((a) => !isRead(a.id)).length
@@ -126,7 +127,7 @@ export function FolioArticleList({
                 {g.items.map((a) => {
                   const read = isRead(a.id)
                   const starred = isStarred(a.id)
-                  const feedName = a.source_id ? feedNameMap[a.source_id] : undefined
+                  const feedName = a.sourceId ? feedNameMap[a.sourceId] : undefined
                   return (
                     <article
                       key={a.id}
@@ -149,7 +150,7 @@ export function FolioArticleList({
                         {a.description && <p className="item-excerpt">{a.description}</p>}
                       </div>
                       <div className="item-aside">
-                        <span className="item-time">{formatRelativeTime(a.published_at)}</span>
+                        <span className="item-time">{formatRelativeTime(a.publishedAt)}</span>
                         <button
                           className={`item-star ${starred ? 'is-on' : ''}`}
                           title={starred ? '已收藏' : '收藏'}

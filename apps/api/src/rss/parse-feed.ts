@@ -1,15 +1,5 @@
-import Parser from 'rss-parser'
+import { XMLParser } from 'fast-xml-parser'
 import { sanitizeHtmlContent } from './sanitize'
-
-const parser = new Parser({
-  customFields: {
-    item: [
-      ['media:thumbnail', 'mediaThumbnail'],
-      ['media:content', 'mediaContent'],
-      ['itunes:image', 'itunesImage'],
-    ],
-  },
-})
 
 export interface ParsedArticle {
   guid?: string
@@ -31,49 +21,118 @@ export interface ParsedFeed {
   articles: ParsedArticle[]
 }
 
-export async function parseFeed(xml: string, feedUrl: string): Promise<ParsedFeed> {
-  const feed = await parser.parseString(xml)
+const parser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: '@_',
+  textNodeName: '#text',
+  isArray: (name) => ['item', 'entry'].includes(name),
+})
 
-  const articles: ParsedArticle[] = feed.items.map((item) => {
-    let imageUrl: string | undefined
+function asArray<T>(value: T | T[] | undefined): T[] {
+  if (!value) return []
+  return Array.isArray(value) ? value : [value]
+}
 
-    if (item.mediaThumbnail) {
-      imageUrl =
-        typeof item.mediaThumbnail === 'string'
-          ? item.mediaThumbnail
-          : (item.mediaThumbnail as { $?: { url: string } })?.$?.url
-    } else if (item.mediaContent) {
-      imageUrl =
-        typeof item.mediaContent === 'string'
-          ? item.mediaContent
-          : (item.mediaContent as { $?: { url: string } })?.$?.url
-    } else if (item.itunesImage) {
-      imageUrl =
-        typeof item.itunesImage === 'string'
-          ? item.itunesImage
-          : (item.itunesImage as { $?: { href: string } })?.$?.href
-    }
+function textOf(node: unknown): string {
+  if (node == null) return ''
+  if (typeof node === 'string' || typeof node === 'number') return String(node)
+  if (typeof node === 'object' && node !== null && '#text' in node) {
+    return String((node as Record<string, unknown>)['#text'] ?? '')
+  }
+  return ''
+}
+
+function attr(node: unknown, name: string): string | undefined {
+  if (!node || typeof node !== 'object') return undefined
+  const v = (node as Record<string, unknown>)[`@_${name}`]
+  return typeof v === 'string' ? v : undefined
+}
+
+export function parseFeed(xml: string, feedUrl: string): ParsedFeed {
+  const doc = parser.parse(xml) as Record<string, unknown>
+
+  // RSS 2.0
+  const rss = doc.rss as Record<string, unknown> | undefined
+  if (rss?.channel) {
+    const channel = rss.channel as Record<string, unknown>
+    const items = asArray(channel.item)
+    const articles: ParsedArticle[] = items.map((item) => {
+      const row = item as Record<string, unknown>
+      const mediaThumb = row['media:thumbnail']
+      const mediaContent = row['media:content']
+      const itunesImage = row['itunes:image']
+
+      let imageUrl =
+        attr(mediaThumb, 'url') ||
+        attr(mediaContent, 'url') ||
+        attr(itunesImage, 'href') ||
+        undefined
+
+      const contentEncoded = textOf(row['content:encoded'])
+      const description = textOf(row.description)
+      const link = textOf(row.link) || attr(row.link, 'href')
+      const guid = textOf(row.guid) || link
+
+      return {
+        guid,
+        link,
+        title: textOf(row.title) || 'Untitled',
+        author: textOf(row['dc:creator']) || textOf(row.author) || undefined,
+        description: description || undefined,
+        content: sanitizeHtmlContent(contentEncoded || description || ''),
+        pubDate: textOf(row.pubDate) ? new Date(textOf(row.pubDate)) : undefined,
+        imageUrl,
+      }
+    })
+
+    const image = channel.image as Record<string, unknown> | undefined
 
     return {
-      guid: item.guid || item.link,
-      link: item.link,
-      title: item.title || 'Untitled',
-      author: item.creator || item.author,
-      description: item.contentSnippet,
-      content: sanitizeHtmlContent(
-        item.content || ((item as Record<string, unknown>)['content:encoded'] as string) || '',
-      ),
-      pubDate: item.pubDate ? new Date(item.pubDate) : undefined,
-      imageUrl,
+      title: textOf(channel.title) || 'Untitled Feed',
+      description: textOf(channel.description) || undefined,
+      feedUrl,
+      siteUrl: textOf(channel.link) || undefined,
+      iconUrl: image ? textOf(image.url) || undefined : undefined,
+      articles,
     }
-  })
-
-  return {
-    title: feed.title || 'Untitled Feed',
-    description: feed.description,
-    feedUrl: feed.feedUrl || feedUrl,
-    siteUrl: feed.link,
-    iconUrl: feed.image?.url,
-    articles,
   }
+
+  // Atom
+  const feed = doc.feed as Record<string, unknown> | undefined
+  if (feed) {
+    const entries = asArray(feed.entry)
+    const articles: ParsedArticle[] = entries.map((entry) => {
+      const row = entry as Record<string, unknown>
+      const links = asArray(row.link)
+      const alt = links.find((l) => !attr(l, 'rel') || attr(l, 'rel') === 'alternate')
+      const link = attr(alt || links[0], 'href')
+      const content = textOf(row.content) || textOf(row.summary)
+
+      return {
+        guid: textOf(row.id) || link,
+        link,
+        title: textOf(row.title) || 'Untitled',
+        author: textOf((row.author as Record<string, unknown> | undefined)?.name) || undefined,
+        description: textOf(row.summary) || undefined,
+        content: sanitizeHtmlContent(content),
+        pubDate: textOf(row.updated || row.published)
+          ? new Date(textOf(row.updated || row.published))
+          : undefined,
+      }
+    })
+
+    const links = asArray(feed.link)
+    const self = links.find((l) => attr(l, 'rel') === 'self')
+    const alt = links.find((l) => !attr(l, 'rel') || attr(l, 'rel') === 'alternate')
+
+    return {
+      title: textOf(feed.title) || 'Untitled Feed',
+      description: textOf(feed.subtitle) || undefined,
+      feedUrl: attr(self, 'href') || feedUrl,
+      siteUrl: attr(alt, 'href'),
+      articles,
+    }
+  }
+
+  throw new Error('Unrecognized feed format')
 }

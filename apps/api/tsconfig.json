@@ -1,20 +1,16 @@
 {
-  "extends": ["@folio/tsconfig/node"],
+  "extends": "@folio/tsconfig/base.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
     "paths": {
-      "~/*": ["./src/*"],
-      "@folio/shared/*": ["../../packages/shared/src/*"],
-      "@folio/db/*": ["../../packages/db/src/*"]
+      "@/*": ["./src/*"]
     },
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "types": ["@cloudflare/workers-types"],
+    "lib": ["ES2022", "WebWorker"],
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false
   },
-  "include": ["src"],
+  "include": ["src", "env.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

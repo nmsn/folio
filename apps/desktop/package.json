@@ -9,13 +9,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@folio/api-client": "workspace:*",
-    "@folio/shared": "workspace:*",
     "@folio/ui": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "electron-vite": "^2.3.0",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "@folio/api": "workspace:*",
+    "@orpc/client": "catalog:",
+    "@orpc/tanstack-query": "catalog:"
   },
   "devDependencies": {
     "@folio/tsconfig": "workspace:*",

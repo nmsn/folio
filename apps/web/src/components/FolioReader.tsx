@@ -65,7 +65,7 @@ export function FolioReader({
   }
 
   const html = (article.description as string | null | undefined) ?? ''
-  const date = new Date(article.published_at as string | number | Date)
+  const date = new Date(article.publishedAt as string | number | Date)
   const dateStr = `${date.getFullYear()} / ${String(date.getMonth() + 1).padStart(2, '0')} / ${String(date.getDate()).padStart(2, '0')}`
 
   return (
@@ -237,7 +237,7 @@ export function FolioReader({
             <div className="avatar">{initials(article.author)}</div>
             <span className="author">{article.author ?? 'Unknown'}</span>
             <span>·</span>
-            <span>{formatRelativeTime(article.published_at)}</span>
+            <span>{formatRelativeTime(article.publishedAt)}</span>
           </div>
 
           <AiSummary

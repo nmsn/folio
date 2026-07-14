@@ -1,5 +1,3 @@
-import got from 'got'
-
 export interface FetchFeedOptions {
   etag?: string
   lastModified?: string
@@ -9,6 +7,7 @@ export interface FetchFeedResult {
   content: string
   etag?: string
   lastModified?: string
+  notModified?: boolean
 }
 
 export async function fetchFeed(
@@ -23,23 +22,27 @@ export async function fetchFeed(
   if (options.etag) headers['If-None-Match'] = options.etag
   if (options.lastModified) headers['If-Modified-Since'] = options.lastModified
 
-  const response = await got(url, {
+  const response = await fetch(url, {
     headers,
-    timeout: { request: 30000 },
-    throwHttpErrors: false,
+    signal: AbortSignal.timeout(30_000),
   })
 
-  if (response.statusCode === 304) {
-    return { content: '', etag: options.etag, lastModified: options.lastModified }
+  if (response.status === 304) {
+    return {
+      content: '',
+      etag: options.etag,
+      lastModified: options.lastModified,
+      notModified: true,
+    }
   }
 
-  if (response.statusCode !== 200) {
-    throw new Error(`Failed to fetch feed: ${response.statusCode}`)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch feed: ${response.status}`)
   }
 
   return {
-    content: response.body,
-    etag: (response.headers.etag as string) || options.etag,
-    lastModified: (response.headers['last-modified'] as string) || options.lastModified,
+    content: await response.text(),
+    etag: response.headers.get('etag') || options.etag,
+    lastModified: response.headers.get('last-modified') || options.lastModified,
   }
 }

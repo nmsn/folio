@@ -6,11 +6,9 @@
   "scripts": {
     "dev": "PORT=5173 vinxi dev",
     "build": "vinxi build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@folio/api-client": "workspace:*",
-    "@folio/shared": "workspace:*",
     "@folio/ui": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
@@ -20,7 +18,10 @@
     "react-dom": "catalog:",
     "tailwind-merge": "catalog:",
     "vinxi": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@folio/api": "workspace:*",
+    "@orpc/client": "catalog:",
+    "@orpc/tanstack-query": "catalog:"
   },
   "devDependencies": {
     "@folio/tsconfig": "workspace:*",

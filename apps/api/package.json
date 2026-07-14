@@ -1,5 +1,5 @@
 {
-  "name": "@folio/api",
+  "name": "@folio/server",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,12 +13,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.41.0",
+    "@folio/api": "workspace:*",
     "@folio/db": "workspace:*",
-    "@folio/shared": "workspace:*",
+    "@mozilla/readability": "^0.6.0",
     "@orpc/server": "catalog:",
     "drizzle-orm": "catalog:",
+    "fast-xml-parser": "^5.0.0",
     "hono": "catalog:",
+    "linkedom": "^0.18.0",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -26,7 +28,6 @@
     "@folio/tsconfig": "workspace:*",
     "@types/node": "catalog:",
     "alchemy": "catalog:",
-    "tsx": "catalog:",
     "typescript": "catalog:",
     "wrangler": "catalog:"
   }

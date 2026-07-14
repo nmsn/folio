@@ -1,10 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { articlesApi } from '@folio/api-client'
+import { orpc } from '../api/orpc'
 
 export function useArticle(id: string) {
   return useQuery({
-    queryKey: ['articles', id],
-    queryFn: () => articlesApi.get(id),
+    ...orpc.articles.get.queryOptions({ input: { id } }),
     enabled: !!id,
   })
 }

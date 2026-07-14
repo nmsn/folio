@@ -1,13 +1,23 @@
 {
-  "extends": ["@folio/tsconfig/react"],
+  "extends": [
+    "@folio/tsconfig/react"
+  ],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"],
-      "@folio/shared/*": ["../../packages/shared/src/*"],
-      "@folio/ui/*": ["../../packages/ui/src/*"]
+      "~/*": [
+        "./src/*"
+      ],
+      "@folio/ui/*": [
+        "../../packages/ui/src/*"
+      ]
     }
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

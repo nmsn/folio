@@ -1,9 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { readingApi } from '@folio/api-client'
+import { orpc } from '../api/orpc'
 
 export function useReadingList() {
-  return useQuery({
-    queryKey: ['reading'],
-    queryFn: () => readingApi.list(),
-  })
+  return useQuery(orpc.reading.list.queryOptions({ input: { limit: 50, offset: 0 } }))
 }

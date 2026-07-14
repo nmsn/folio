@@ -9,12 +9,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@folio/api-client": "workspace:*",
-    "@folio/shared": "workspace:*",
     "@folio/ui": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "react": "catalog:",
-    "wxt": "^0.10.0"
+    "wxt": "^0.10.0",
+    "@folio/api": "workspace:*",
+    "@orpc/client": "catalog:",
+    "@orpc/tanstack-query": "catalog:"
   },
   "devDependencies": {
     "@folio/tsconfig": "workspace:*",

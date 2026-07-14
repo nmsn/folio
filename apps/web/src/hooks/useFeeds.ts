@@ -1,19 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { feedsApi } from '@folio/api-client'
+import { orpc, client } from '../lib/orpc'
 
 export function useFeeds() {
-  return useQuery({
-    queryKey: ['feeds'],
-    queryFn: () => feedsApi.list() as Promise<any[]>,
-  })
+  return useQuery(orpc.feeds.list.queryOptions())
 }
 
 export function useCreateFeed() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (input: { name: string; url: string }) => feedsApi.create(input),
+    mutationFn: (input: { name: string; url: string; description?: string; category?: string }) =>
+      client.feeds.create(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['feeds'] })
+      queryClient.invalidateQueries({ queryKey: orpc.feeds.key() })
     },
   })
 }
@@ -21,10 +19,10 @@ export function useCreateFeed() {
 export function useRefreshFeed() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (feedId: string) => feedsApi.refresh(feedId),
+    mutationFn: (feedId: string) => client.feeds.refresh({ id: feedId }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['feeds'] })
-      queryClient.invalidateQueries({ queryKey: ['articles'] })
+      queryClient.invalidateQueries({ queryKey: orpc.feeds.key() })
+      queryClient.invalidateQueries({ queryKey: orpc.articles.key() })
     },
   })
 }
@@ -32,9 +30,9 @@ export function useRefreshFeed() {
 export function useDeleteFeed() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (feedId: string) => feedsApi.delete(feedId),
+    mutationFn: (feedId: string) => client.feeds.delete({ id: feedId }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['feeds'] })
+      queryClient.invalidateQueries({ queryKey: orpc.feeds.key() })
     },
   })
 }

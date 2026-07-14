@@ -1,9 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { feedsApi } from '@folio/api-client'
+import { orpc } from '../api/orpc'
 
 export function useFeeds() {
-  return useQuery({
-    queryKey: ['feeds'],
-    queryFn: () => feedsApi.list(),
-  })
+  return useQuery(orpc.feeds.list.queryOptions())
 }

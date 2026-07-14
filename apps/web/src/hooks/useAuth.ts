@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { apiClient } from '@folio/api-client'
+import { client, setSessionToken, getSessionToken } from '../lib/orpc'
 
 interface User {
   id: string
@@ -13,28 +13,39 @@ export function useAuth() {
 
   const checkSession = async () => {
     try {
-      const res = await apiClient.get<{ user: User | null }>('/auth/session')
+      if (!getSessionToken()) {
+        setUser(null)
+        return
+      }
+      const res = await client.auth.getSession()
       setUser(res.user)
     } catch {
       setUser(null)
+      setSessionToken(null)
     } finally {
       setLoading(false)
     }
   }
 
   const signin = async (email: string, password: string) => {
-    const res = await apiClient.post<{ user: User }>('/auth/signin', { email, password })
+    const res = await client.auth.signin({ email, password })
+    setSessionToken(res.session.sessionId)
     setUser(res.user)
     return res.user
   }
 
   const signout = async () => {
-    await apiClient.post('/auth/signout', {})
-    setUser(null)
+    try {
+      await client.auth.signout()
+    } finally {
+      setSessionToken(null)
+      setUser(null)
+    }
   }
 
   const signup = async (name: string, email: string, password: string) => {
-    const res = await apiClient.post<{ user: User }>('/auth/signup', { name, email, password })
+    const res = await client.auth.signup({ name, email, password })
+    setSessionToken(res.session.sessionId)
     setUser(res.user)
     return res.user
   }
