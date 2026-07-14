@@ -1,6 +1,6 @@
-import { Module } from '@nestjs/common';
-import { DatabaseModule } from '../database/database.module';
-import { DefaultFeedsSeed } from './default-feeds';
+import { Module } from '@nestjs/common'
+import { DatabaseModule } from '../database/database.module'
+import { DefaultFeedsSeed } from './default-feeds'
 
 @Module({
   imports: [DatabaseModule],

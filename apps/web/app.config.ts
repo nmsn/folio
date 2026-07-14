@@ -1,7 +1,7 @@
-import { createApp } from 'vinxi';
-import postcss from 'postcss';
-import tailwindcss from 'tailwindcss';
-import autoprefixer from 'autoprefixer';
+import { createApp } from 'vinxi'
+import postcss from 'postcss'
+import tailwindcss from 'tailwindcss'
+import autoprefixer from 'autoprefixer'
 
 /**
  * Vite 插件：把所有 .css 文件通过 postcss + tailwindcss + autoprefixer 链处理。
@@ -19,17 +19,17 @@ const postcssTailwindPlugin = {
   name: 'vinxi-postcss-tailwind',
   enforce: 'pre' as const,
   async transform(code: string, id: string) {
-    if (!id.endsWith('.css')) return null;
+    if (!id.endsWith('.css')) return null
     const result = await postcss([tailwindcss(), autoprefixer()]).process(code, {
       from: id,
       map: { inline: false },
-    });
+    })
     return {
       code: result.css,
       map: result.map ? result.map.toJSON() : null,
-    };
+    }
   },
-};
+}
 
 export default createApp({
   server: {
@@ -57,4 +57,4 @@ export default createApp({
       plugins: () => [postcssTailwindPlugin],
     },
   ],
-});
+})

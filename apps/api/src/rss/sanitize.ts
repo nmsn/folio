@@ -1,4 +1,4 @@
-import sanitizeHtml from 'sanitize-html';
+import sanitizeHtml from 'sanitize-html'
 
 export function sanitizeHtmlContent(html: string): string {
   return sanitizeHtml(html, {
@@ -9,5 +9,5 @@ export function sanitizeHtmlContent(html: string): string {
       a: ['href', 'title', 'rel'],
     },
     allowedSchemes: ['http', 'https', 'mailto'],
-  });
+  })
 }

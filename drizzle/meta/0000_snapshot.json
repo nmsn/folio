@@ -45,12 +45,8 @@
           "name": "ai_annotations_reading_item_id_reading_items_id_fk",
           "tableFrom": "ai_annotations",
           "tableTo": "reading_items",
-          "columnsFrom": [
-            "reading_item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reading_item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -135,12 +131,8 @@
           "name": "articles_source_id_rss_sources_id_fk",
           "tableFrom": "articles",
           "tableTo": "rss_sources",
-          "columnsFrom": [
-            "source_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["source_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -208,12 +200,8 @@
           "name": "reading_items_user_id_users_id_fk",
           "tableFrom": "reading_items",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -221,12 +209,8 @@
           "name": "reading_items_article_id_articles_id_fk",
           "tableFrom": "reading_items",
           "tableTo": "articles",
-          "columnsFrom": [
-            "article_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["article_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -312,12 +296,8 @@
           "name": "rss_sources_user_id_users_id_fk",
           "tableFrom": "rss_sources",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -360,12 +340,8 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -427,9 +403,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       }
     }

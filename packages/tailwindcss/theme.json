@@ -3,21 +3,21 @@
   "theme": {
     "extend": {
       "colors": {
-        "paper":      "var(--bg)",
-        "surface":    "var(--surface)",
-        "surface-2":  "var(--surface-2)",
-        "fg":         "var(--fg)",
-        "fg-2":       "var(--fg-2)",
-        "muted":      "var(--muted)",
-        "muted-2":    "var(--muted-2)",
-        "border":     "var(--border)",
-        "border-2":   "var(--border-2)",
-        "accent":     "var(--accent)",
-        "accent-hover":  "var(--accent-hover)",
-        "accent-soft":   "var(--accent-soft)",
-        "accent-ink":    "var(--accent-ink)",
-        "read":       "var(--read)",
-        "star":       "var(--star)"
+        "paper": "var(--bg)",
+        "surface": "var(--surface)",
+        "surface-2": "var(--surface-2)",
+        "fg": "var(--fg)",
+        "fg-2": "var(--fg-2)",
+        "muted": "var(--muted)",
+        "muted-2": "var(--muted-2)",
+        "border": "var(--border)",
+        "border-2": "var(--border-2)",
+        "accent": "var(--accent)",
+        "accent-hover": "var(--accent-hover)",
+        "accent-soft": "var(--accent-soft)",
+        "accent-ink": "var(--accent-ink)",
+        "read": "var(--read)",
+        "star": "var(--star)"
       },
       "borderRadius": {
         "xs": "var(--r-xs)",
@@ -30,7 +30,7 @@
         "mono": "var(--font-mono)"
       },
       "width": {
-        "nav":  "var(--col-nav)",
+        "nav": "var(--col-nav)",
         "list": "var(--col-list)",
         "read": "var(--col-read)"
       }

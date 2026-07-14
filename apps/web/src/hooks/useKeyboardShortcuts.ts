@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect } from 'react'
 
 export interface ShortcutHandlers {
-  onNext?: () => void;
-  onPrev?: () => void;
-  onToggleStar?: () => void;
-  onMarkRead?: () => void;
-  onToggleAI?: () => void;
+  onNext?: () => void
+  onPrev?: () => void
+  onToggleStar?: () => void
+  onMarkRead?: () => void
+  onToggleAI?: () => void
 }
 
 /**
@@ -15,28 +15,28 @@ export interface ShortcutHandlers {
 export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement | null;
+      const t = e.target as HTMLElement | null
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
-        return;
+        return
       }
       if (e.key === 'j' || e.key === 'ArrowDown') {
-        e.preventDefault();
-        handlers.onNext?.();
+        e.preventDefault()
+        handlers.onNext?.()
       } else if (e.key === 'k' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        handlers.onPrev?.();
+        e.preventDefault()
+        handlers.onPrev?.()
       } else if (e.key === 's') {
-        e.preventDefault();
-        handlers.onToggleStar?.();
+        e.preventDefault()
+        handlers.onToggleStar?.()
       } else if (e.key === 'm') {
-        e.preventDefault();
-        handlers.onMarkRead?.();
+        e.preventDefault()
+        handlers.onMarkRead?.()
       } else if ((e.metaKey || e.ctrlKey) && e.key === '.') {
-        e.preventDefault();
-        handlers.onToggleAI?.();
+        e.preventDefault()
+        handlers.onToggleAI?.()
       }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [handlers]);
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [handlers])
 }

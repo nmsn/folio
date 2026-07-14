@@ -1,7 +1,7 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { feedsApi } from '@folio/api-client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { feedsApi } from '@folio/api-client'
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
 export function Sidepanel() {
   return (
@@ -13,5 +13,5 @@ export function Sidepanel() {
         </div>
       </div>
     </QueryClientProvider>
-  );
+  )
 }

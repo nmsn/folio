@@ -1,8 +1,8 @@
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
-import { useReadingList } from '../hooks/useReadingList';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native'
+import { useReadingList } from '../hooks/useReadingList'
 
 export function ReadingListScreen({ navigation }: any) {
-  const { data: items } = useReadingList();
+  const { data: items } = useReadingList()
 
   return (
     <FlatList
@@ -18,5 +18,5 @@ export function ReadingListScreen({ navigation }: any) {
         </TouchableOpacity>
       )}
     />
-  );
+  )
 }

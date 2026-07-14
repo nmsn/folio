@@ -4,33 +4,30 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsc -p tsconfig.json || true && (echo '{\"type\":\"commonjs\"}' > dist/package.json) && concurrently -k -n tsc,node -c blue,green \"tsc -w -p tsconfig.json\" \"node --watch --enable-source-maps dist/main.js\"",
-    "build": "tsup",
+    "dev": "alchemy dev",
+    "build": "alchemy deploy --dry-run",
+    "deploy:dev": "alchemy deploy --stage dev",
+    "deploy:prod": "alchemy deploy --stage prod",
+    "destroy:dev": "alchemy destroy --stage dev",
+    "destroy:prod": "alchemy destroy --stage prod",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.100.1",
+    "@anthropic-ai/sdk": "^0.41.0",
     "@folio/db": "workspace:*",
     "@folio/shared": "workspace:*",
-    "@mozilla/readability": "^0.6.0",
-    "@nestjs/common": "^10.4.0",
-    "@nestjs/config": "^3.2.0",
-    "@nestjs/core": "^10.4.0",
-    "@nestjs/platform-express": "^10.4.0",
-    "better-auth": "^1.0.0",
-    "jsdom": "^29.1.1",
-    "pg-boss": "^8.0.0",
-    "reflect-metadata": "^0.2.0",
-    "rss-parser": "^3.13.0",
-    "rxjs": "^7.8.0",
-    "sanitize-html": "^2.17.4",
-    "zod": "^3.23.0"
+    "@orpc/server": "catalog:",
+    "drizzle-orm": "catalog:",
+    "hono": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "catalog:",
     "@folio/tsconfig": "workspace:*",
-    "@types/node": "^20.0.0",
-    "concurrently": "^10.0.3",
-    "tsx": "^4.19.0",
-    "typescript": "^5.6.0"
+    "@types/node": "catalog:",
+    "alchemy": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "wrangler": "catalog:"
   }
 }

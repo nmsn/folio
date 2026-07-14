@@ -1,0 +1,1628 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Folio · Reader</title>
+  <style>
+    /* ============================================================
+       Folio — three-column RSS reader
+       Direction: editorial-modern hybrid
+       Canvas : warm paper (low-chroma off-white)
+       Accent : warm terracotta (RSS-orange homage)
+       Type   : serif body + sans UI + mono meta
+       ============================================================ */
+    :root {
+      /* surfaces */
+      --bg:         oklch(98.5% 0.005 85);
+      --surface:    oklch(99.6% 0.002 85);
+      --surface-2:  oklch(97.2% 0.006 85);
+      --fg:         oklch(22% 0.012 70);
+      --fg-2:       oklch(38% 0.012 70);
+      --muted:      oklch(52% 0.012 70);
+      --muted-2:    oklch(65% 0.010 70);
+      --border:     oklch(89% 0.008 85);
+      --border-2:   oklch(82% 0.010 85);
+      /* accent */
+      --accent:        oklch(62% 0.16 38);
+      --accent-hover:  oklch(56% 0.17 35);
+      --accent-soft:   oklch(95% 0.035 40);
+      --accent-ink:    oklch(99% 0.005 85);
+      /* state */
+      --read:       oklch(70% 0.008 70);
+      --star:       oklch(72% 0.14 75);
+      /* type */
+      --font-display: 'Iowan Old Style', 'Charter', 'Source Serif Pro', Georgia, 'Songti SC', 'STSong', serif;
+      --font-ui:      -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Hiragino Sans GB', system-ui, sans-serif;
+      --font-mono:    ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+      /* rhythm */
+      --r-xs: 4px;
+      --r-sm: 8px;
+      --r-md: 12px;
+      --col-nav: 264px;
+      --col-list: 392px;
+      --col-read: min(720px, 100%);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font: 14px/1.55 var(--font-ui);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+    body {
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    button {
+      font: inherit; color: inherit;
+      background: none; border: 0; padding: 0; cursor: pointer;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* ---------- app shell ---------- */
+    .app {
+      display: grid;
+      grid-template-columns: var(--col-nav) var(--col-list) 1fr;
+      height: 100vh;
+      max-width: 1440px;
+      margin: 0 auto;
+      background: var(--bg);
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+    .col { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    .col + .col { border-left: 1px solid var(--border); }
+
+    /* ---------- top bar (slim) ---------- */
+    .topbar {
+      display: flex; align-items: center;
+      height: 48px; flex: 0 0 48px;
+      padding: 0 16px 0 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .topbar .brand {
+      font-family: var(--font-display);
+      font-size: 18px; font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--fg);
+    }
+    .topbar .brand .dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      margin-left: 2px; margin-right: 6px;
+      transform: translateY(-3px);
+    }
+    .topbar .crumb {
+      margin-left: 16px; padding-left: 16px;
+      border-left: 1px solid var(--border);
+      color: var(--muted);
+      font: 12px/1 var(--font-mono);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .topbar .spacer { flex: 1; }
+    .topbar .actions { display: flex; align-items: center; gap: 4px; }
+    .icon-btn {
+      width: 32px; height: 32px;
+      display: grid; place-items: center;
+      border-radius: var(--r-sm);
+      color: var(--muted);
+      transition: background .12s, color .12s;
+    }
+    .icon-btn:hover { background: var(--surface-2); color: var(--fg); }
+    .icon-btn svg { width: 18px; height: 18px; stroke-width: 1.6; }
+
+    /* ---------- nav column ---------- */
+    .nav-search {
+      padding: 12px 14px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-search .field {
+      display: flex; align-items: center; gap: 8px;
+      height: 32px;
+      padding: 0 10px;
+      background: var(--surface-2);
+      border: 1px solid transparent;
+      border-radius: var(--r-sm);
+      color: var(--muted);
+    }
+    .nav-search .field:focus-within {
+      background: var(--surface);
+      border-color: var(--border-2);
+      color: var(--fg);
+    }
+    .nav-search .field svg { width: 14px; height: 14px; flex: 0 0 14px; }
+    .nav-search input {
+      flex: 1; min-width: 0;
+      background: none; border: 0; outline: 0;
+      font: 13px/1 var(--font-ui);
+      color: var(--fg);
+    }
+    .nav-search input::placeholder { color: var(--muted-2); }
+    .nav-search .kbd {
+      font: 10px/1 var(--font-mono);
+      color: var(--muted-2);
+      padding: 3px 5px;
+      border: 1px solid var(--border-2);
+      border-radius: 3px;
+      background: var(--bg);
+    }
+
+    .nav-scroll { flex: 1; overflow-y: auto; padding: 8px 0 12px; }
+    .nav-scroll::-webkit-scrollbar { width: 8px; }
+    .nav-scroll::-webkit-scrollbar-thumb { background: transparent; border-radius: 4px; }
+    .nav-scroll:hover::-webkit-scrollbar-thumb { background: var(--border-2); }
+
+    .nav-section { padding: 10px 0 4px; }
+    .nav-section h6 {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 0 14px 4px;
+      padding: 0 4px;
+      font: 10px/1 var(--font-mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted-2);
+    }
+    .nav-section h6 .chev {
+      width: 12px; height: 12px;
+      transition: transform .15s;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%;
+      padding: 6px 14px;
+      color: var(--fg-2);
+      font-size: 13px;
+      border-radius: 0;
+      position: relative;
+      transition: background .1s, color .1s;
+    }
+    .nav-item:hover { background: var(--surface-2); color: var(--fg); }
+    .nav-item .icon {
+      width: 16px; height: 16px; flex: 0 0 16px;
+      color: var(--muted);
+    }
+    .nav-item .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .nav-item .count {
+      font: 11px/1 var(--font-mono);
+      color: var(--muted);
+      padding: 2px 6px;
+      border-radius: 999px;
+      min-width: 18px; text-align: center;
+    }
+    .nav-item.has-unread .count {
+      background: var(--accent-soft);
+      color: var(--accent-hover);
+      font-weight: 600;
+    }
+    .nav-item.active {
+      background: var(--accent-soft);
+      color: var(--accent-hover);
+      font-weight: 600;
+    }
+    .nav-item.active::before {
+      content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 2px;
+      background: var(--accent); border-radius: 1px;
+    }
+    .nav-item.active .icon { color: var(--accent); }
+    .nav-item.active.has-unread .count { background: var(--accent); color: var(--accent-ink); }
+
+    .nav-group-toggle .chev { transform: rotate(0deg); }
+    .nav-group.collapsed .nav-group-toggle .chev { transform: rotate(-90deg); }
+    .nav-group.collapsed .nav-children { display: none; }
+
+    .nav-footer {
+      border-top: 1px solid var(--border);
+      padding: 10px 8px 12px;
+    }
+
+    /* ---------- list column ---------- */
+    .list-head {
+      flex: 0 0 auto;
+      padding: 14px 20px 8px;
+    }
+    .list-head h2 {
+      margin: 0;
+      font: 600 18px/1.2 var(--font-ui);
+      letter-spacing: -0.01em;
+    }
+    .list-head .sub {
+      margin-top: 2px;
+      font: 12px/1 var(--font-mono);
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+    .list-tabs {
+      display: flex; gap: 2px;
+      padding: 8px 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .list-tab {
+      padding: 8px 10px;
+      font: 12px/1 var(--font-ui);
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color .12s, border-color .12s;
+    }
+    .list-tab:hover { color: var(--fg); }
+    .list-tab.active {
+      color: var(--fg);
+      font-weight: 600;
+      border-bottom-color: var(--accent);
+    }
+    .list-tab .num {
+      font: 10px/1 var(--font-mono);
+      color: var(--muted-2);
+      margin-left: 4px;
+    }
+    .list-tab.active .num { color: var(--muted); }
+
+    .list-scroll { flex: 1; overflow-y: auto; }
+    .list-scroll::-webkit-scrollbar { width: 8px; }
+    .list-scroll::-webkit-scrollbar-thumb { background: transparent; border-radius: 4px; }
+    .list-scroll:hover::-webkit-scrollbar-thumb { background: var(--border-2); }
+
+    .day-sep {
+      display: flex; align-items: center; gap: 8px;
+      padding: 14px 20px 6px;
+      font: 10px/1 var(--font-mono);
+      color: var(--muted-2);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .day-sep::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    .item {
+      display: grid;
+      grid-template-columns: 14px 1fr auto;
+      gap: 10px;
+      padding: 12px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background .1s;
+      position: relative;
+    }
+    .item:hover { background: var(--surface-2); }
+    .item.is-active { background: var(--surface); }
+    .item.is-active::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+      background: var(--accent);
+    }
+    .unread {
+      width: 6px; height: 6px;
+      margin-top: 7px;
+      border-radius: 50%;
+      background: transparent;
+      flex: 0 0 6px;
+    }
+    .item.is-unread .unread { background: var(--accent); }
+    .item.is-active.is-unread .unread { background: var(--accent); }
+    .item.is-read .unread { background: var(--border-2); }
+    .item-body { min-width: 0; }
+    .item-meta {
+      display: flex; align-items: center; gap: 8px;
+      font: 11px/1 var(--font-mono);
+      color: var(--muted);
+      margin-bottom: 5px;
+      letter-spacing: 0.02em;
+    }
+    .item-meta .src { color: var(--fg-2); font-weight: 500; letter-spacing: 0.01em; font-family: var(--font-ui); }
+    .item-meta .dot { width: 2px; height: 2px; background: var(--muted-2); border-radius: 50%; }
+    .item-title {
+      font: 600 14px/1.35 var(--font-ui);
+      color: var(--fg);
+      letter-spacing: -0.005em;
+      margin: 0 0 4px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .item.is-read .item-title { color: var(--muted); font-weight: 500; }
+    .item.is-unread .item-title { color: var(--fg); }
+    .item-excerpt {
+      font: 13px/1.45 var(--font-ui);
+      color: var(--muted);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .item.is-read .item-excerpt { color: var(--muted-2); }
+    .item-aside {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+      padding-top: 2px;
+    }
+    .item-time {
+      font: 11px/1 var(--font-mono);
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .item-star {
+      width: 22px; height: 22px;
+      display: grid; place-items: center;
+      color: var(--muted-2);
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity .1s, color .1s, background .1s;
+    }
+    .item:hover .item-star,
+    .item.is-active .item-star,
+    .item-star.is-on { opacity: 1; }
+    .item-star:hover { color: var(--star); background: var(--surface); }
+    .item-star.is-on { color: var(--star); opacity: 1; }
+    .item-star svg { width: 14px; height: 14px; stroke-width: 1.6; }
+    .item-star.is-on svg { fill: currentColor; }
+
+    /* ---------- article column ---------- */
+    .article-toolbar {
+      flex: 0 0 48px;
+      display: flex; align-items: center; gap: 4px;
+      padding: 0 16px 0 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tool-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 30px; padding: 0 8px;
+      font: 12px/1 var(--font-ui);
+      color: var(--muted);
+      border-radius: var(--r-sm);
+      transition: background .12s, color .12s;
+    }
+    .tool-btn:hover { background: var(--surface-2); color: var(--fg); }
+    .tool-btn.is-on { color: var(--accent-hover); }
+    .tool-btn svg { width: 15px; height: 15px; stroke-width: 1.6; }
+    .tool-btn .kbd {
+      font: 10px/1 var(--font-mono);
+      color: var(--muted-2);
+      padding: 2px 4px;
+      border: 1px solid var(--border-2);
+      border-radius: 3px;
+      background: var(--bg);
+      margin-left: 2px;
+    }
+
+    .article-scroll {
+      flex: 1; overflow-y: auto;
+      padding: 36px 0 80px;
+    }
+    .article-scroll::-webkit-scrollbar { width: 10px; }
+    .article-scroll::-webkit-scrollbar-thumb { background: transparent; border-radius: 5px; }
+    .article-scroll:hover::-webkit-scrollbar-thumb { background: var(--border-2); }
+
+    .article {
+      max-width: var(--col-read);
+      margin: 0 auto;
+      padding: 0 48px;
+    }
+    .article-kicker {
+      display: flex; align-items: center; gap: 10px;
+      font: 11px/1 var(--font-mono);
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .article-kicker .src { color: var(--accent-hover); font-weight: 600; letter-spacing: 0.06em; }
+    .article-kicker .sep { color: var(--muted-2); }
+    .article h1.title {
+      font: 700 34px/1.18 var(--font-display);
+      letter-spacing: -0.018em;
+      color: var(--fg);
+      margin: 0 0 14px;
+    }
+    .article .dek {
+      font: 18px/1.5 var(--font-display);
+      color: var(--fg-2);
+      margin: 0 0 22px;
+      font-style: italic;
+    }
+    .article .byline {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 0 20px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      font: 12px/1.2 var(--font-mono);
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+    .article .byline .author { color: var(--fg); font-weight: 500; letter-spacing: 0.01em; font-family: var(--font-ui); }
+    .article .byline .avatar {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: linear-gradient(135deg, oklch(70% 0.12 30), oklch(58% 0.16 28));
+      color: #fff;
+      display: grid; place-items: center;
+      font: 600 10px/1 var(--font-ui);
+      letter-spacing: 0;
+    }
+    /* ---------- AI summary card ---------- */
+    .ai-summary {
+      margin: 22px 0 0;
+      background: var(--accent-soft);
+      border: 1px solid oklch(82% 0.05 40);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .ai-summary:hover { border-color: var(--accent); }
+    .ai-summary .ai-head {
+      width: 100%;
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 16px;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      text-align: left;
+      user-select: none;
+      transition: background .12s;
+    }
+    .ai-summary .ai-head:hover { background: oklch(93% 0.04 42); }
+    .ai-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font: 600 10.5px/1 var(--font-mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent-hover);
+      background: var(--bg);
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+    }
+    .ai-badge svg { width: 12px; height: 12px; stroke-width: 1.8; }
+    .ai-status {
+      font: 12px/1.2 var(--font-mono);
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+    .ai-chev {
+      margin-left: auto;
+      color: var(--muted);
+      transition: transform .25s, color .12s;
+      display: inline-block;
+    }
+    .ai-chev svg { width: 14px; height: 14px; stroke-width: 1.8; }
+    .ai-summary.is-open .ai-chev { transform: rotate(180deg); color: var(--accent-hover); }
+
+    .ai-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .35s ease;
+    }
+    .ai-summary.is-open .ai-body { max-height: 1200px; }
+    .ai-body-inner { padding: 4px 22px 18px; }
+
+    .ai-tldr {
+      font: italic 17px/1.55 var(--font-display);
+      color: var(--fg);
+      margin: 0 0 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px dashed oklch(82% 0.05 40);
+      letter-spacing: -0.005em;
+      min-height: 1.55em;
+    }
+    .ai-tldr::before {
+      content: '\201C';
+      color: var(--accent);
+      font: 700 28px/0.6 var(--font-display);
+      margin-right: 2px;
+      vertical-align: -8px;
+    }
+    .ai-tldr::after {
+      content: '\201D';
+      color: var(--accent);
+      font: 700 28px/0.6 var(--font-display);
+      margin-left: 2px;
+      vertical-align: -8px;
+    }
+    .ai-points { list-style: none; padding: 0; margin: 0; }
+    .ai-points li {
+      position: relative;
+      font: 14px/1.6 var(--font-ui);
+      color: var(--fg-2);
+      padding: 7px 0 7px 22px;
+      min-height: 1.6em;
+    }
+    .ai-points li::before {
+      content: '';
+      position: absolute;
+      left: 4px; top: 15px;
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+    .ai-points li + li {
+      border-top: 1px solid oklch(88% 0.03 45);
+    }
+    .ai-foot {
+      display: flex; align-items: center; gap: 12px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed oklch(82% 0.05 40);
+      font: 11px/1 var(--font-mono);
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .ai-foot .spacer { flex: 1; }
+    .ai-foot .ai-act {
+      font: 11px/1 var(--font-mono);
+      color: var(--fg-2);
+      padding: 6px 10px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border-2);
+      background: var(--bg);
+      transition: background .12s, color .12s, border-color .12s;
+      letter-spacing: 0.04em;
+    }
+    .ai-foot .ai-act:hover { background: var(--surface-2); color: var(--fg); border-color: var(--accent); }
+    .ai-foot .ai-act.is-copied { color: var(--accent-hover); border-color: var(--accent); }
+
+    /* typewriter cursor */
+    .ai-cursor {
+      display: inline-block;
+      width: 1px;
+      height: 1.1em;
+      background: var(--accent);
+      margin-left: 1px;
+      vertical-align: text-bottom;
+      animation: aiBlink .8s steps(2) infinite;
+    }
+    @keyframes aiBlink { 50% { opacity: 0; } }
+
+    /* loading dots */
+    .ai-loading-dots { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
+    .ai-loading-dots i {
+      display: inline-block;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: aiDot 1.1s infinite;
+    }
+    .ai-loading-dots i:nth-child(2) { animation-delay: .15s; }
+    .ai-loading-dots i:nth-child(3) { animation-delay: .3s; }
+    @keyframes aiDot {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+      30%          { transform: translateY(-4px); opacity: 1; }
+    }
+
+    /* AI trigger in toolbar — slightly more prominent */
+    .tool-btn.is-ai {
+      color: var(--accent-hover);
+      font-weight: 500;
+    }
+    .tool-btn.is-ai:hover { background: var(--accent-soft); color: var(--accent-hover); }
+    .tool-btn.is-ai.is-on { background: var(--accent-soft); }
+    .tool-btn.is-ai svg { stroke: var(--accent); }
+    .tool-btn.is-ai .ai-spark {
+      animation: aiSparkPulse 2.4s ease-in-out infinite;
+    }
+    @keyframes aiSparkPulse {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.55; }
+    }
+
+    .article .body {
+      font: 17px/1.72 var(--font-display);
+      color: var(--fg);
+      margin-top: 28px;
+    }
+    .article .body p { margin: 0 0 1.1em; }
+    .article .body p:first-of-type::first-letter {
+      font: 700 56px/0.9 var(--font-display);
+      float: left;
+      padding: 4px 10px 0 0;
+      color: var(--accent);
+      letter-spacing: -0.04em;
+    }
+    .article .body a {
+      color: var(--accent-hover);
+      border-bottom: 1px solid var(--accent-soft);
+      transition: border-color .12s;
+    }
+    .article .body a:hover { border-color: var(--accent); }
+    .article .body em { font-style: italic; }
+    .article .body strong { font-weight: 700; color: var(--fg); }
+
+    .pull-quote {
+      margin: 28px 0;
+      padding: 20px 24px;
+      border-left: 3px solid var(--accent);
+      background: var(--accent-soft);
+      border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    }
+    .pull-quote p {
+      font: 600 20px/1.45 var(--font-display);
+      font-style: italic;
+      color: var(--fg);
+      margin: 0;
+      letter-spacing: -0.005em;
+    }
+    .pull-quote .attr {
+      margin-top: 10px;
+      font: 11px/1 var(--font-mono);
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .article-foot {
+      margin-top: 36px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      font: 12px/1 var(--font-mono);
+      color: var(--muted);
+    }
+    .article-foot .progress {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .article-foot .bar {
+      width: 120px; height: 3px; background: var(--surface-2);
+      border-radius: 2px; overflow: hidden;
+    }
+    .article-foot .bar i {
+      display: block; height: 100%;
+      width: 28%;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .next-up {
+      margin-top: 28px;
+      padding: 16px 20px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .next-up .label {
+      font: 10px/1 var(--font-mono);
+      color: var(--muted);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .next-up .next-title {
+      flex: 1; min-width: 0;
+      font: 600 14px/1.35 var(--font-ui);
+      color: var(--fg);
+      letter-spacing: -0.005em;
+    }
+    .next-up .next-src {
+      font: 11px/1 var(--font-mono);
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .next-up .arrow {
+      width: 28px; height: 28px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      background: var(--bg);
+      color: var(--fg-2);
+      border: 1px solid var(--border-2);
+    }
+    .next-up .arrow svg { width: 14px; height: 14px; }
+
+    .keyhint {
+      position: fixed; left: 50%; bottom: 14px;
+      transform: translateX(-50%);
+      display: inline-flex; align-items: center; gap: 14px;
+      padding: 6px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      box-shadow: 0 1px 0 var(--border);
+      font: 11px/1 var(--font-mono);
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .keyhint .group { display: inline-flex; align-items: center; gap: 5px; }
+    .keyhint kbd {
+      display: inline-grid; place-items: center;
+      min-width: 18px; height: 18px; padding: 0 5px;
+      background: var(--bg);
+      border: 1px solid var(--border-2);
+      border-bottom-width: 2px;
+      border-radius: 4px;
+      font: 10px/1 var(--font-mono);
+      color: var(--fg-2);
+    }
+
+    /* ---------- responsive ---------- */
+    @media (max-width: 1100px) {
+      .app { grid-template-columns: var(--col-nav) 1fr; }
+      .col-list { display: none; }
+    }
+    @media (max-width: 720px) {
+      .app { grid-template-columns: 1fr; }
+      .col-nav { display: none; }
+      .article { padding: 0 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- ============================================================
+         COLUMN 1 — NAVIGATION (sources, folders, smart views)
+         ============================================================ -->
+    <aside class="col col-nav">
+      <div class="topbar">
+        <div class="brand">Folio<span class="dot"></span></div>
+        <div class="spacer"></div>
+        <div class="actions">
+          <button class="icon-btn" title="同步">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.36L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.36L21 8"/><path d="M21 3v5h-5"/><path d="M3 21v-5h5"/></svg>
+          </button>
+          <button class="icon-btn" title="设置">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 0 1 4.27 16.9l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 0 1 7.04 4.27l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="nav-search">
+        <label class="field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="text" placeholder="搜索订阅源或文章" />
+          <span class="kbd">⌘K</span>
+        </label>
+      </div>
+
+      <nav class="nav-scroll">
+
+        <!-- smart views -->
+        <div class="nav-section">
+          <button class="nav-item has-unread active" data-view="all">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h12"/></svg>
+            <span class="label">全部文章</span>
+            <span class="count">24</span>
+          </button>
+          <button class="nav-item has-unread" data-view="today">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span class="label">今天</span>
+            <span class="count">12</span>
+          </button>
+          <button class="nav-item has-unread" data-view="unread">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/></svg>
+            <span class="label">未读</span>
+            <span class="count">24</span>
+          </button>
+          <button class="nav-item" data-view="starred">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span class="label">已收藏</span>
+            <span class="count">8</span>
+          </button>
+          <button class="nav-item" data-view="later">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            <span class="label">稍后读</span>
+            <span class="count">3</span>
+          </button>
+        </div>
+
+        <!-- tech sources -->
+        <div class="nav-section nav-group" data-group="tech">
+          <h6>
+            <button class="nav-group-toggle" style="display:flex;align-items:center;gap:6px;">
+              技术
+              <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <span style="font-weight:400;">6</span>
+          </h6>
+          <div class="nav-children">
+            <button class="nav-item has-unread" data-src="stratechery">
+              <span class="icon" style="width:6px;height:6px;border-radius:50%;background:var(--accent);margin-left:5px;margin-right:5px;"></span>
+              <span class="label">Stratechery</span>
+              <span class="count">4</span>
+            </button>
+            <button class="nav-item has-unread" data-src="df">
+              <span class="icon" style="width:6px;height:6px;border-radius:50%;background:oklch(70% 0.10 30);margin-left:5px;margin-right:5px;"></span>
+              <span class="label">Daring Fireball</span>
+              <span class="count">3</span>
+            </button>
+            <button class="nav-item has-unread" data-src="hn">
+              <span class="icon" style="width:6px;height:6px;border-radius:50%;background:oklch(65% 0.18 50);margin-left:5px;margin-right:5px;"></span>
+              <span class="label">Hacker News</span>
+              <span class="count">6</span>
+            </button>
+            <button class="nav-item" data-src="lwn">
+              <span class="icon" style="width:6px;height:6px;border-radius:50%;background:oklch(60% 0.10 240);margin-left:5px;margin-right:5px;"></span>
+              <span class="label">LWN.net</span>
+              <span class="count">1</span>
+            </button>
+            <button class="nav-item" data-src="cf">
+              <span class="icon" style="width:6px;height:6px;border-radius:50%;background:oklch(60% 0.14 30);margin-left:5px;margin-right:5px;"></span>
+              <span class="label">Cloudflare Blog</span>
+              <span class="count">0</span>
+            </button>
+            <button class="nav-item" data-src="dhh">
+              <span class="icon" style="width:6px;height:6px;border-radius:50%;background:oklch(58% 0.16 28);margin-left:5px;margin-right:5px;"></span>
+              <span class="label">David Heinemeier Hansson</span>
+              <span class="count">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- design sources -->
+        <div class="nav-section nav-group" data-group="design">
+          <h6>
+            <button class="nav-group-toggle" style="display:flex;align-items:center;gap:6px;">
+              设计
+              <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <span style="font-weight:400;">4</span>
+          </h6>
+          <div class="nav-children">
+            <button class="nav-item" data-src="arena">
+              <span class="icon" style="width:6px;height:6px;border-radius:50%;background:oklch(60% 0.05 100);margin-left:5px;margin-right:5px;"></span>
+              <span class="label">Are.na Editorial</span>
+              <span class="count">0</span>
+            </button>
+            <button class="nav-item" data-src="kottke">
+              <span class="icon" style="width:6px;height:6px;border-radius:50%;background:oklch(70% 0.12 60);margin-left:5px;margin-right:5px;"></span>
+              <span class="label">kottke.org</span>
+              <span class="count">2</span>
+            </button>
+            <button class="nav-item" data-src="sidebar">
+              <span class="icon" style="width:6px;height:6px;border-radius:50%;background:oklch(58% 0.10 220);margin-left:5px;margin-right:5px;"></span>
+              <span class="label">Sidebar.io</span>
+              <span class="count">0</span>
+            </button>
+            <button class="nav-item" data-src="marco">
+              <span class="icon" style="width:6px;height:6px;border-radius:50%;background:oklch(55% 0.14 30);margin-left:5px;margin-right:5px;"></span>
+              <span class="label">Marco.org</span>
+              <span class="count">1</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- news sources -->
+        <div class="nav-section nav-group" data-group="news">
+          <h6>
+            <button class="nav-group-toggle" style="display:flex;align-items:center;gap:6px;">
+              新闻
+              <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <span style="font-weight:400;">3</span>
+          </h6>
+          <div class="nav-children">
+            <button class="nav-item has-unread" data-src="verge">
+              <span class="icon" style="width:6px;height:6px;border-radius:50%;background:oklch(60% 0.18 20);margin-left:5px;margin-right:5px;"></span>
+              <span class="label">The Verge</span>
+              <span class="count">3</span>
+            </button>
+            <button class="nav-item" data-src="ars">
+              <span class="icon" style="width:6px;height:6px;border-radius:50%;background:oklch(58% 0.18 25);margin-left:5px;margin-right:5px;"></span>
+              <span class="label">Ars Technica</span>
+              <span class="count">0</span>
+            </button>
+            <button class="nav-item" data-src="reuters">
+              <span class="icon" style="width:6px;height:6px;border-radius:50%;background:oklch(60% 0.18 25);margin-left:5px;margin-right:5px;"></span>
+              <span class="label">Reuters</span>
+              <span class="count">0</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="nav-footer">
+          <button class="nav-item" style="color:var(--muted);">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span class="label">添加订阅源</span>
+          </button>
+          <button class="nav-item" style="color:var(--muted);">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span class="label">导入 OPML</span>
+          </button>
+        </div>
+
+      </nav>
+    </aside>
+
+    <!-- ============================================================
+         COLUMN 2 — ARTICLE LIST
+         ============================================================ -->
+    <section class="col col-list">
+      <div class="list-head">
+        <h2>全部文章</h2>
+        <div class="sub">24 篇 · 来自 12 个源</div>
+      </div>
+      <div class="list-tabs">
+        <button class="list-tab active" data-filter="all">全部<span class="num">24</span></button>
+        <button class="list-tab" data-filter="unread">未读<span class="num">24</span></button>
+        <button class="list-tab" data-filter="starred">已收藏<span class="num">8</span></button>
+      </div>
+      <div class="list-scroll" id="listScroll">
+
+        <div class="day-sep">今天</div>
+
+        <article class="item is-active is-unread" data-id="a1" data-state="unread">
+          <span class="unread"></span>
+          <div class="item-body">
+            <div class="item-meta">
+              <span class="src">Stratechery</span>
+              <span class="dot"></span>
+              <span>Ben Thompson</span>
+            </div>
+            <h3 class="item-title">Google Reader 死后十二年：RSS 并没有失败，它只是换了身份</h3>
+            <p class="item-excerpt">2013 年人们说 RSS 死了。事实是它只是不再以"祖父技术"的姿态被讨论 —— 它悄悄变成了播客、Substack、YouTube 频道脚下的地基。</p>
+          </div>
+          <div class="item-aside">
+            <span class="item-time">4 小时前</span>
+            <button class="item-star is-on" title="已收藏">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <article class="item is-unread" data-id="a2" data-state="unread">
+          <span class="unread"></span>
+          <div class="item-body">
+            <div class="item-meta">
+              <span class="src">Daring Fireball</span>
+              <span class="dot"></span>
+              <span>John Gruber</span>
+            </div>
+            <h3 class="item-title">关于 Apple 翻译与设备端模型的几点思考</h3>
+            <p class="item-excerpt">当"AI"被简化成云端聊天框讨论时，Apple 选了另一条更难走的路 —— 把模型塞进设备，把延迟和隐私留给用户。</p>
+          </div>
+          <div class="item-aside">
+            <span class="item-time">6 小时前</span>
+            <button class="item-star" title="收藏">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <article class="item is-unread" data-id="a3" data-state="unread">
+          <span class="unread"></span>
+          <div class="item-body">
+            <div class="item-meta">
+              <span class="src">Hacker News</span>
+              <span class="dot"></span>
+              <span>社区</span>
+            </div>
+            <h3 class="item-title">Show HN: 我用三年时间重写了一个 RSS 阅读器，目标是"安静"</h3>
+            <p class="item-excerpt">没有算法推荐，没有"为你推荐"，没有红色徽章 —— 只有你订阅的源、你标记的文章、和一列你的阅读节奏。</p>
+          </div>
+          <div class="item-aside">
+            <span class="item-time">8 小时前</span>
+            <button class="item-star is-on" title="已收藏">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <article class="item is-unread" data-id="a4" data-state="unread">
+          <span class="unread"></span>
+          <div class="item-body">
+            <div class="item-meta">
+              <span class="src">The Verge</span>
+              <span class="dot"></span>
+              <span>Nilay Patel</span>
+            </div>
+            <h3 class="item-title">算法信息流的尽头，会不会是一种"反向回退"</h3>
+            <p class="item-excerpt">当 TikTok 的"看完一个再推一个"也开始被吐槽时，越来越多用户开始主动把 RSS 当作减噪工具。</p>
+          </div>
+          <div class="item-aside">
+            <span class="item-time">10 小时前</span>
+            <button class="item-star" title="收藏">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <div class="day-sep">昨天</div>
+
+        <article class="item is-unread" data-id="a5" data-state="unread">
+          <span class="unread"></span>
+          <div class="item-body">
+            <div class="item-meta">
+              <span class="src">kottke.org</span>
+              <span class="dot"></span>
+              <span>Jason Kottke</span>
+            </div>
+            <h3 class="item-title">小受众的快乐：当你的读者只有 200 人</h3>
+            <p class="item-excerpt">我做了 26 年的独立博客，每天的真实读者大概只有几百人。但正是这种规模，让写作本身成为奖励。</p>
+          </div>
+          <div class="item-aside">
+            <span class="item-time">昨天</span>
+            <button class="item-star is-on" title="已收藏">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <article class="item is-unread" data-id="a6" data-state="unread">
+          <span class="unread"></span>
+          <div class="item-body">
+            <div class="item-meta">
+              <span class="src">Stratechery</span>
+              <span class="dot"></span>
+              <span>Ben Thompson</span>
+            </div>
+            <h3 class="item-title">独立写作的经济学：为什么订阅制是更稳的模式</h3>
+            <p class="item-excerpt">广告、捐赠、按篇付费 —— 每种模式都有自己的摩擦。Substack 走通的那条路，本质上是把作者和读者直接连起来。</p>
+          </div>
+          <div class="item-aside">
+            <span class="item-time">昨天</span>
+            <button class="item-star" title="收藏">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <article class="item is-unread" data-id="a7" data-state="unread">
+          <span class="unread"></span>
+          <div class="item-body">
+            <div class="item-meta">
+              <span class="src">Marco.org</span>
+              <span class="dot"></span>
+              <span>Marco Arment</span>
+            </div>
+            <h3 class="item-title">"慢软件"小宣言：为日常使用而做，而不是为截图而做</h3>
+            <p class="item-excerpt">我们这一行开始出现一种奇怪的偏向：把工具做得"看起来很聪明"，而不是"用起来很舒服"。我更愿意反着来。</p>
+          </div>
+          <div class="item-aside">
+            <span class="item-time">昨天</span>
+            <button class="item-star" title="收藏">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <div class="day-sep">本周更早</div>
+
+        <article class="item is-unread" data-id="a8" data-state="unread">
+          <span class="unread"></span>
+          <div class="item-body">
+            <div class="item-meta">
+              <span class="src">LWN.net</span>
+              <span class="dot"></span>
+              <span>编辑团队</span>
+            </div>
+            <h3 class="item-title">LWN Weekly Edition：内核 6.14 与 Rust 驱动进展</h3>
+            <p class="item-excerpt">本周值得关注的变化集中在 Rust for Linux 子系统的合并节奏、io_uring 的新接口、以及一些被推迟的用户可见调整。</p>
+          </div>
+          <div class="item-aside">
+            <span class="item-time">3 天前</span>
+            <button class="item-star is-on" title="已收藏">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <article class="item is-unread" data-id="a9" data-state="unread">
+          <span class="unread"></span>
+          <div class="item-body">
+            <div class="item-meta">
+              <span class="src">Daring Fireball</span>
+              <span class="dot"></span>
+              <span>John Gruber</span>
+            </div>
+            <h3 class="item-title">关于"开放网络之死"：与其哀悼，不如重建</h3>
+            <p class="item-excerpt">个人主页、订阅、博客圈子 —— 这些东西没有真的消失，只是分散到了很多个不那么显眼的地方。</p>
+          </div>
+          <div class="item-aside">
+            <span class="item-time">4 天前</span>
+            <button class="item-star" title="收藏">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <article class="item is-unread" data-id="a10" data-state="unread">
+          <span class="unread"></span>
+          <div class="item-body">
+            <div class="item-meta">
+              <span class="src">kottke.org</span>
+              <span class="dot"></span>
+              <span>Jason Kottke</span>
+            </div>
+            <h3 class="item-title">为纯文本辩护：在 Markdown 之外其实也没什么损失</h3>
+            <p class="item-excerpt">我所有的笔记、清单、博客草稿都活在纯文本里。换过 Notion、换过 Obsidian、最后还是回到了最朴素的 .md。</p>
+          </div>
+          <div class="item-aside">
+            <span class="item-time">5 天前</span>
+            <button class="item-star" title="收藏">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         COLUMN 3 — ARTICLE CONTENT
+         ============================================================ -->
+    <section class="col col-content">
+      <div class="article-toolbar">
+        <button class="tool-btn" title="上一篇文章">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="tool-btn" title="下一篇文章">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div style="width:1px;height:18px;background:var(--border);margin:0 6px;"></div>
+        <button class="tool-btn is-on" id="btnStar" title="已收藏">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          已收藏
+        </button>
+        <button class="tool-btn" id="btnRead" title="标记为已读">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          标记已读
+        </button>
+        <div style="width:1px;height:18px;background:var(--border);margin:0 6px;"></div>
+        <button class="tool-btn is-ai" id="btnAI" title="AI 总结当前文章 (⌘ + .)">
+          <svg class="ai-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3"/></svg>
+          AI 总结
+          <span class="kbd">⌘.</span>
+        </button>
+        <div class="spacer" style="flex:1;"></div>
+        <button class="tool-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          稍后读
+        </button>
+        <button class="tool-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          分享
+        </button>
+        <button class="tool-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
+      </div>
+
+      <div class="article-scroll">
+        <article class="article">
+          <div class="article-kicker">
+            <span class="src">Stratechery</span>
+            <span class="sep">·</span>
+            <span>本周专栏</span>
+            <span class="sep">·</span>
+            <span>2026 / 06 / 06</span>
+          </div>
+          <h1 class="title">Google Reader 死后十二年：RSS 并没有失败，它只是换了身份</h1>
+          <p class="dek">在算法信息流统治一切的时代，最古老的"你订阅什么我看什么"模型，正在悄悄成为新一代阅读工具的默认地基。</p>
+
+          <div class="byline">
+            <div class="avatar">BT</div>
+            <span class="author">Ben Thompson</span>
+            <span>·</span>
+            <span>4 小时前</span>
+            <span>·</span>
+            <span>约 8 分钟阅读</span>
+          </div>
+
+          <aside class="ai-summary" id="aiSummary" aria-expanded="false">
+            <button class="ai-head" id="aiHead" type="button" aria-controls="aiBody">
+              <span class="ai-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3"/></svg>
+                AI 总结
+              </span>
+              <span class="ai-status" id="aiStatus">点击展开 · 节省 ~6 分钟</span>
+              <span class="ai-chev">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </span>
+            </button>
+            <div class="ai-body" id="aiBody">
+              <div class="ai-body-inner">
+                <p class="ai-tldr" id="aiTldr"></p>
+                <ul class="ai-points" id="aiPoints"></ul>
+                <div class="ai-foot">
+                  <span class="ai-meta" id="aiMeta">—</span>
+                  <div class="spacer"></div>
+                  <button class="ai-act" id="aiCopy" type="button">复制</button>
+                  <button class="ai-act" id="aiRegen" type="button">重新生成</button>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <div class="body">
+            <p>2013 年 7 月，Google 关闭了 Google Reader。当时很多人觉得这是 RSS 的丧钟 —— 互联网的中心化时代正在加速，开放协议正在败退。一个工具的死亡，被解读成一种阅读方式的死亡。十二年后，事实恰恰相反。RSS 没有死。它只是不再以"祖父级技术"的姿态被讨论 —— 它悄悄变成了播客、YouTube 频道、Substack newsletter、以及任何想"按用户节奏送达"的产品脚下的地基。</p>
+
+            <p>这件事的关键不是协议本身，而是协议所代表的关系：你订阅源，源推送内容给你，读者在客户端里安静地读。这套关系不依赖平台、不依赖算法、不依赖广告。在 2026 年，这听起来几乎是一种<strong>政治声明</strong>。</p>
+
+            <div class="pull-quote">
+              <p>RSS 一直都在。它只是不再喊自己的名字。</p>
+              <div class="attr">— 编辑按</div>
+            </div>
+
+            <p>我在 2013 年之后几乎用过所有主流阅读器：Feedly、Inoreader、NetNewsWire、Reeder、Readwise Reader、Omnivore。每一次更换，都是为了寻找一种"不被打扰"的阅读节奏。每一次留下，都是因为某个新的工具把"读"这件事做得更好 —— 更安静的界面、更可控的标记、更克制的同步。这种进化的轨迹本身就说明了一件事：底层协议没有限制上层体验，限制体验的只是设计者愿不愿意认真做"读"这件事。</p>
+
+            <p>我尤其喜欢的一个变化是：现代阅读器开始把"我读过什么"变成一种<em>个人索引</em>，而不再是平台服务器里的一行日志。当你的阅读历史只属于你，当高亮、笔记、星标、稍后读这些行为变成可导出的纯文本时，<a href="#">阅读才重新成为一种主权</a>。这不只是技术问题，这是观念问题。</p>
+
+            <p>当然，RSS 不会"赢"。它从一开始就不是为了赢。它是一种默认：当你不想被算法决定看什么的时候，它就在那里；当你希望自己决定哪些源值得信任的时候，它就在那里。算法的雄心是占领你所有的空闲时间，而 RSS 的克制是<strong>把选择权还给你</strong>。十二年后回头看，这种克制反而是它最大的胜利。</p>
+
+            <p>如果你还没用过 RSS，或者你在 2013 年后离开了它，现在可能是一个不错的回归时机。这一代阅读器 —— 不管是 NetNewsWire 的清爽、Reeder 的精致，还是 Readwise Reader 的笔记深度 —— 都把"读"这件事做得比那个被关闭的 Google Reader 时代要好得多。唯独一件事没变：<em>你依然只能读你订阅的源</em>。这件事在今天，仍然是一种解放。</p>
+          </div>
+
+          <div class="article-foot">
+            <div class="progress">
+              <span>阅读进度</span>
+              <span class="bar"><i></i></span>
+              <span style="color:var(--fg-2);">28%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;">
+              <span>全文约 2,140 字</span>
+              <span style="color:var(--border-2);">·</span>
+              <span>来自 Stratechery 本周专栏</span>
+            </div>
+          </div>
+
+          <div class="next-up">
+            <div style="flex:1;min-width:0;">
+              <div class="label">下一篇 · 来自 Daring Fireball</div>
+              <div class="next-title">关于 Apple 翻译与设备端模型的几点思考</div>
+              <div class="next-src">John Gruber · 6 小时前 · 5 分钟阅读</div>
+            </div>
+            <button class="arrow" title="下一篇">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <!-- keyhint -->
+  <div class="keyhint" aria-hidden="true">
+    <span class="group"><kbd>j</kbd><kbd>k</kbd> 上下篇</span>
+    <span class="group"><kbd>s</kbd> 收藏</span>
+    <span class="group"><kbd>m</kbd> 标记已读</span>
+    <span class="group"><kbd>⌘</kbd><kbd>.</kbd> AI 总结</span>
+    <span class="group"><kbd>⌘</kbd><kbd>K</kbd> 搜索</span>
+  </div>
+
+  <script>
+    // -------- 1. nav group collapse --------
+    document.querySelectorAll('.nav-group .nav-group-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var group = btn.closest('.nav-group');
+        if (group) group.classList.toggle('collapsed');
+      });
+    });
+
+    // -------- 2. nav item selection (visual only) --------
+    document.querySelectorAll('.nav-item').forEach(function (item) {
+      item.addEventListener('click', function () {
+        document.querySelectorAll('.nav-item').forEach(function (i) { i.classList.remove('active'); });
+        item.classList.add('active');
+      });
+    });
+
+    // -------- 3. list tabs --------
+    document.querySelectorAll('.list-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        document.querySelectorAll('.list-tab').forEach(function (t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        var filter = tab.getAttribute('data-filter');
+        document.querySelectorAll('.item').forEach(function (it) {
+          var state = it.getAttribute('data-state');
+          if (filter === 'all') it.style.display = '';
+          else if (filter === 'unread') it.style.display = (state === 'unread') ? '' : 'none';
+          else if (filter === 'starred') it.style.display = (it.querySelector('.item-star').classList.contains('is-on')) ? '' : 'none';
+        });
+      });
+    });
+
+    // -------- 4. list item selection --------
+    document.querySelectorAll('#listScroll .item').forEach(function (item) {
+      item.addEventListener('click', function (e) {
+        if (e.target.closest('.item-star')) return;
+        document.querySelectorAll('#listScroll .item').forEach(function (i) { i.classList.remove('is-active'); });
+        item.classList.add('is-active');
+        // mark as read on click
+        item.classList.remove('is-unread');
+        item.setAttribute('data-state', 'read');
+        item.querySelector('.unread').style.background = 'var(--border-2)';
+      });
+    });
+
+    // -------- 5. star toggle on list items --------
+    document.querySelectorAll('.item-star').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        btn.classList.toggle('is-on');
+      });
+    });
+
+    // -------- 6. star toggle on article toolbar --------
+    var btnStar = document.getElementById('btnStar');
+    if (btnStar) {
+      btnStar.addEventListener('click', function () {
+        btnStar.classList.toggle('is-on');
+      });
+    }
+
+    // -------- 7. mark as read on article toolbar --------
+    var btnRead = document.getElementById('btnRead');
+    if (btnRead) {
+      btnRead.addEventListener('click', function () {
+        var active = document.querySelector('#listScroll .item.is-active');
+        if (!active) return;
+        active.classList.remove('is-unread');
+        active.setAttribute('data-state', 'read');
+        active.querySelector('.unread').style.background = 'var(--border-2)';
+        btnRead.style.color = 'var(--muted-2)';
+        btnRead.querySelector('svg').setAttribute('fill', 'none');
+      });
+    }
+
+    // -------- 8. keyboard shortcuts (j / k / s / m / ⌘.) --------
+    document.addEventListener('keydown', function (e) {
+      var t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      var items = Array.prototype.slice.call(document.querySelectorAll('#listScroll .item'))
+        .filter(function (i) { return i.style.display !== 'none'; });
+      var active = document.querySelector('#listScroll .item.is-active');
+      var idx = items.indexOf(active);
+      if (e.key === 'j' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (idx < items.length - 1) {
+          if (active) active.classList.remove('is-active');
+          items[idx + 1].classList.add('is-active');
+          items[idx + 1].scrollIntoView({ block: 'nearest' });
+        }
+      } else if (e.key === 'k' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (idx > 0) {
+          if (active) active.classList.remove('is-active');
+          items[idx - 1].classList.add('is-active');
+          items[idx - 1].scrollIntoView({ block: 'nearest' });
+        }
+      } else if (e.key === 's') {
+        e.preventDefault();
+        if (active) {
+          var star = active.querySelector('.item-star');
+          if (star) star.click();
+        }
+      } else if (e.key === 'm') {
+        e.preventDefault();
+        if (active) {
+          active.classList.remove('is-unread');
+          active.setAttribute('data-state', 'read');
+          active.querySelector('.unread').style.background = 'var(--border-2)';
+        }
+      } else if ((e.metaKey || e.ctrlKey) && e.key === '.') {
+        e.preventDefault();
+        aiToggle();
+      }
+    });
+
+    // -------- 9. AI summary (mock + typewriter) --------
+    var AI_SUMMARIES = {
+      'a1': {
+        tldr: 'RSS 并没有失败 —— 它只是换了一种语言。',
+        points: [
+          'Google Reader 在 2013 年关闭后，RSS 失去了中心化入口，但协议本身仍在驱动所有"按订阅送达"的产品：播客、Substack、YouTube 频道。',
+          '新一代阅读器（NetNewsWire、Reeder、Readwise Reader）靠"把读这件事做得更安静"胜出，而不是协议本身的胜利。',
+          '真正的解放不在技术层：把"我读过什么"重新变成只属于读者的个人索引，把选择权从算法手里拿回来。'
+        ],
+        saved: 6,
+        source: 'Folio 摘要 · Stratechery'
+      },
+      'a3': {
+        tldr: '三年重写只为"安静"：一款阅读器可以从信息流退场开始设计。',
+        points: [
+          '没有算法推荐，没有"为你推荐"，没有红色徽章 —— 只有你订阅的源、你标记的文章、和一列你的阅读节奏。',
+          '慢软件哲学：日常使用优先于截图时刻，留白比填充更难做对。',
+          '这次重写的核心命题是让"读完"成为可能，而不是"永远在刷"。'
+        ],
+        saved: 4,
+        source: 'Folio 摘要 · Show HN'
+      },
+      'a5': {
+        tldr: '小受众是一种被低估的自由：200 个真读者，可能比 20 万沉默访客更有价值。',
+        points: [
+          '当读者数小到可以记名字，写作就从"投放"变成"对话"，压力和意义同时变大。',
+          '订阅制的真正优势不是收入稳定，而是强迫作者为"会被读完"负责。',
+          '平台奖励爆款，订阅奖励耐性 —— 两种经济学的回报曲线完全不同。'
+        ],
+        saved: 5,
+        source: 'Folio 摘要'
+      },
+      '_default': function (title, dek) {
+        return {
+          tldr: '本篇围绕"' + (title || '一个核心主张') + '"展开，核心结论是 — —',
+          points: [
+            '观点一：' + (dek || '文章提出了一个值得反复推敲的判断。'),
+            '观点二：从历史或行业视角看，这个判断有更深的来源。',
+            '观点三：对读者来说，可以带走的一个具体动作或提醒。'
+          ],
+          saved: 4,
+          source: 'Folio 摘要'
+        };
+      }
+    };
+
+    var ai = {
+      el: document.getElementById('aiSummary'),
+      head: document.getElementById('aiHead'),
+      body: document.getElementById('aiBody'),
+      status: document.getElementById('aiStatus'),
+      tldr: document.getElementById('aiTldr'),
+      points: document.getElementById('aiPoints'),
+      meta: document.getElementById('aiMeta'),
+      trigger: document.getElementById('btnAI'),
+      copy: document.getElementById('aiCopy'),
+      regen: document.getElementById('aiRegen'),
+      busy: false
+    };
+
+    function aiGetActive() {
+      var a = document.querySelector('#listScroll .item.is-active');
+      if (!a) return null;
+      return {
+        id: a.getAttribute('data-id'),
+        title: (a.querySelector('.item-title') || {}).textContent || '',
+        dek: (a.querySelector('.item-excerpt') || {}).textContent || ''
+      };
+    }
+
+    function aiGetSummary(meta) {
+      if (!meta) return null;
+      var s = AI_SUMMARIES[meta.id];
+      if (s) return s;
+      var fn = AI_SUMMARIES._default;
+      return typeof fn === 'function' ? fn(meta.title, meta.dek) : null;
+    }
+
+    function aiCursor() {
+      var c = document.createElement('span');
+      c.className = 'ai-cursor';
+      return c;
+    }
+
+    function aiTypeText(el, text, speed) {
+      return new Promise(function (resolve) {
+        if (!el) { resolve(); return; }
+        el.textContent = '';
+        var cur = aiCursor();
+        el.appendChild(cur);
+        var i = 0;
+        function tick() {
+          if (i >= text.length) {
+            if (cur.parentNode) cur.parentNode.removeChild(cur);
+            resolve();
+            return;
+          }
+          var ch = text.charAt(i);
+          cur.before(document.createTextNode(ch));
+          i++;
+          var d = speed;
+          if ('。.!?！？\n'.indexOf(ch) >= 0) d = speed * 7;
+          else if ('，,;；、'.indexOf(ch) >= 0) d = speed * 4;
+          setTimeout(tick, d);
+        }
+        tick();
+      });
+    }
+
+    function aiTypeList(ul, items, speed) {
+      return items.reduce(function (p, text, idx) {
+        return p.then(function () {
+          var li = ul.children[idx];
+          if (!li) return;
+          return aiTypeText(li, (idx + 1) + '. ' + text, speed);
+        });
+      }, Promise.resolve());
+    }
+
+    function aiClose() {
+      ai.el.classList.remove('is-open', 'is-loading', 'is-done');
+      ai.el.setAttribute('aria-expanded', 'false');
+      ai.status.textContent = ai.status.dataset.idle || '点击展开 · 节省 ~6 分钟';
+      ai.tldr.textContent = '';
+      ai.points.innerHTML = '';
+      ai.meta.textContent = '—';
+      if (ai.trigger) ai.trigger.classList.remove('is-on');
+    }
+
+    function aiOpen() {
+      if (!ai.el) return;
+      if (ai.busy) return;
+      ai.busy = true;
+      var meta = aiGetActive();
+      var s = aiGetSummary(meta);
+      if (!s) { ai.busy = false; return; }
+
+      ai.el.classList.add('is-open', 'is-loading');
+      ai.el.setAttribute('aria-expanded', 'true');
+      ai.status.textContent = '正在总结...';
+      ai.tldr.textContent = '';
+      ai.tldr.appendChild(aiCursor());
+      ai.points.innerHTML = '';
+      s.points.forEach(function () {
+        var li = document.createElement('li');
+        ai.points.appendChild(li);
+      });
+      ai.meta.textContent = '—';
+      if (ai.trigger) ai.trigger.classList.add('is-on');
+
+      setTimeout(function () {
+        if (!ai.el.classList.contains('is-open')) { ai.busy = false; return; }
+        ai.el.classList.remove('is-loading');
+        ai.el.classList.add('is-done');
+        ai.status.textContent = '由 Folio 摘要生成';
+        ai.meta.textContent = s.source + ' · 节省 ~' + s.saved + ' 分钟';
+        aiTypeText(ai.tldr, s.tldr, 26)
+          .then(function () { return aiTypeList(ai.points, s.points, 14); })
+          .then(function () { ai.busy = false; });
+      }, 850);
+    }
+
+    function aiToggle() {
+      if (!ai.el) return;
+      if (ai.el.classList.contains('is-open')) aiClose();
+      else aiOpen();
+    }
+
+    if (ai.head) ai.head.addEventListener('click', aiToggle);
+    if (ai.trigger) {
+      ai.trigger.addEventListener('click', function (e) {
+        e.preventDefault();
+        aiToggle();
+      });
+    }
+    if (ai.copy) {
+      ai.copy.addEventListener('click', function () {
+        var lines = [ai.tldr.textContent.trim()];
+        var items = ai.points.querySelectorAll('li');
+        items.forEach(function (li, i) {
+          var t = li.textContent.replace(/^\d+\.\s*/, '').trim();
+          lines.push((i + 1) + '. ' + t);
+        });
+        var text = lines.join('\n');
+        var done = function () {
+          ai.copy.classList.add('is-copied');
+          var prev = ai.copy.textContent;
+          ai.copy.textContent = '已复制';
+          setTimeout(function () {
+            ai.copy.classList.remove('is-copied');
+            ai.copy.textContent = prev;
+          }, 1400);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, done);
+        } else {
+          done();
+        }
+      });
+    }
+    if (ai.regen) {
+      ai.regen.addEventListener('click', function () {
+        if (ai.busy) return;
+        ai.busy = true;
+        ai.el.classList.add('is-loading');
+        ai.el.classList.remove('is-done');
+        ai.status.textContent = '重新生成中...';
+        ai.tldr.textContent = '';
+        ai.tldr.appendChild(aiCursor());
+        ai.points.innerHTML = '';
+        var meta = aiGetActive();
+        var s = aiGetSummary(meta);
+        if (!s) { ai.busy = false; return; }
+        s.points.forEach(function () {
+          var li = document.createElement('li');
+          ai.points.appendChild(li);
+        });
+        setTimeout(function () {
+          ai.el.classList.remove('is-loading');
+          ai.el.classList.add('is-done');
+          ai.status.textContent = '由 Folio 摘要生成';
+          ai.meta.textContent = s.source + ' · 节省 ~' + s.saved + ' 分钟';
+          aiTypeText(ai.tldr, s.tldr, 26)
+            .then(function () { return aiTypeList(ai.points, s.points, 14); })
+            .then(function () { ai.busy = false; });
+        }, 700);
+      });
+    }
+  </script>
+</body>
+</html>

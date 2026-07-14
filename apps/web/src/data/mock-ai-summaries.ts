@@ -1,8 +1,8 @@
 export interface AiSummary {
-  tldr: string;
-  points: string[];
-  saved: number;
-  source: string;
+  tldr: string
+  points: string[]
+  saved: number
+  source: string
 }
 
 const DEFAULTS: Record<string, AiSummary> = {
@@ -11,7 +11,7 @@ const DEFAULTS: Record<string, AiSummary> = {
     points: [
       'Google Reader 在 2013 年关闭后，RSS 失去了中心化入口，但协议本身仍在驱动所有"按订阅送达"的产品：播客、Substack、YouTube 频道。',
       '新一代阅读器靠"把读这件事做得更安静"胜出，而不是协议本身的胜利。',
-      '把"我读过什么"重新变成只属于读者的个人索引，把选择权从算法手里拿回来。'
+      '把"我读过什么"重新变成只属于读者的个人索引，把选择权从算法手里拿回来。',
     ],
     saved: 6,
     source: 'Folio 摘要',
@@ -21,7 +21,7 @@ const DEFAULTS: Record<string, AiSummary> = {
     points: [
       '当 TikTok 的"看完一个再推一个"也开始被吐槽时，越来越多用户开始把 RSS 当作减噪工具。',
       '消费科技新闻的注意力正在从社交分发回流到订阅分发。',
-      '"你订阅什么我看什么"再次成为一种用户主张。'
+      '"你订阅什么我看什么"再次成为一种用户主张。',
     ],
     saved: 4,
     source: 'Folio 摘要',
@@ -31,7 +31,7 @@ const DEFAULTS: Record<string, AiSummary> = {
     points: [
       '评测与调查类内容对算法推荐的依赖度低，更适合 RSS 长读场景。',
       '技术读者更愿意为"专业策展"付费 / 订阅。',
-      'RSS 适合深度，时效性内容更适合推送。'
+      'RSS 适合深度，时效性内容更适合推送。',
     ],
     saved: 5,
     source: 'Folio 摘要',
@@ -41,12 +41,12 @@ const DEFAULTS: Record<string, AiSummary> = {
     points: [
       '科技商业新闻的密度高、来源分散，订阅源能整合多源。',
       '行业快讯适合用过滤器（关键词、来源）二次筛选。',
-      'RSS + 标签 / 智能视图是构建私人信息流的最低成本方式。'
+      'RSS + 标签 / 智能视图是构建私人信息流的最低成本方式。',
     ],
     saved: 5,
     source: 'Folio 摘要',
   },
-};
+}
 
 function fallback(title: string, excerpt: string): AiSummary {
   return {
@@ -58,7 +58,7 @@ function fallback(title: string, excerpt: string): AiSummary {
     ],
     saved: 4,
     source: 'Folio 摘要',
-  };
+  }
 }
 
 /**
@@ -66,14 +66,14 @@ function fallback(title: string, excerpt: string): AiSummary {
  * 找不到则用 title + excerpt 派生默认版本。
  */
 export function getMockAiSummary(article: {
-  id: string;
-  title: string;
-  url?: string;
-  description?: string | null;
+  id: string
+  title: string
+  url?: string
+  description?: string | null
 }): AiSummary {
-  const text = (article.url ?? '') + ' ' + article.title + ' ' + (article.description ?? '');
+  const text = (article.url ?? '') + ' ' + article.title + ' ' + (article.description ?? '')
   for (const [key, summary] of Object.entries(DEFAULTS)) {
-    if (text.toLowerCase().includes(key.replace('_', ' '))) return summary;
+    if (text.toLowerCase().includes(key.replace('_', ' '))) return summary
   }
-  return fallback(article.title, article.description ?? '');
+  return fallback(article.title, article.description ?? '')
 }

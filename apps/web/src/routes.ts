@@ -1,3 +1,3 @@
-import { indexRoute } from './routes/_index';
+import { indexRoute } from './routes/_index'
 
-export const routeTree = indexRoute;
+export const routeTree = indexRoute

@@ -10,5 +10,5 @@ export function App() {
         <p className="text-muted-foreground">Desktop app coming soon...</p>
       </main>
     </div>
-  );
+  )
 }

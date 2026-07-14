@@ -1,10 +1,10 @@
-const API_BASE = '/api';
+const API_BASE = '/api'
 
 export class ApiClient {
-  private baseUrl: string;
+  private baseUrl: string
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || API_BASE;
+    this.baseUrl = baseUrl || API_BASE
   }
 
   async request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -15,36 +15,36 @@ export class ApiClient {
         ...options?.headers,
       },
       credentials: 'include',
-    });
+    })
 
     if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+      throw new Error(`API error: ${response.status}`)
     }
 
-    return response.json() as T;
+    return response.json() as T
   }
 
   get<T>(path: string) {
-    return this.request<T>(path, { method: 'GET' });
+    return this.request<T>(path, { method: 'GET' })
   }
 
   post<T>(path: string, body: unknown) {
     return this.request<T>(path, {
       method: 'POST',
       body: JSON.stringify(body),
-    });
+    })
   }
 
   patch<T>(path: string, body: unknown) {
     return this.request<T>(path, {
       method: 'PATCH',
       body: JSON.stringify(body),
-    });
+    })
   }
 
   delete<T>(path: string) {
-    return this.request<T>(path, { method: 'DELETE' });
+    return this.request<T>(path, { method: 'DELETE' })
   }
 }
 
-export const apiClient = new ApiClient();
+export const apiClient = new ApiClient()

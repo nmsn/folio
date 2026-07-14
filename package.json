@@ -2,13 +2,15 @@
   "name": "folio",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "pnpm@10.24.0",
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "lint": "turbo lint",
+    "lint": "biome check",
+    "lint:fix": "biome check --write",
     "typecheck": "turbo typecheck",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format": "biome format --write",
+    "format:check": "biome format",
     "db:generate": "pnpm --filter @folio/db generate",
     "db:migrate": "pnpm --filter @folio/db migrate",
     "db:studio": "pnpm --filter @folio/db studio",
@@ -16,16 +18,16 @@
     "dev:api": "pnpm --filter @folio/api dev",
     "dev:desktop": "pnpm --filter @folio/desktop dev",
     "dev:mobile": "pnpm --filter @folio/mobile dev",
-    "dev:extension": "pnpm --filter @folio/extension dev",
-    "docker:dev": "docker compose -f docker/docker-compose.dev.yml up"
+    "dev:extension": "pnpm --filter @folio/extension dev"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
     "turbo": "^2.0.0",
-    "prettier": "^3.3.0",
-    "typescript": "^5.6.0"
+    "typescript": "catalog:"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.0.0",
+    "pnpm": ">=10.0.0"
   }
 }

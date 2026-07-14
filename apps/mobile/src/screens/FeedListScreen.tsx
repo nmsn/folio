@@ -1,10 +1,10 @@
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
-import { useFeeds } from '../hooks/useFeeds';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native'
+import { useFeeds } from '../hooks/useFeeds'
 
 export function FeedListScreen({ navigation }: any) {
-  const { data: feeds, isLoading } = useFeeds();
+  const { data: feeds, isLoading } = useFeeds()
 
-  if (isLoading) return <Text>Loading...</Text>;
+  if (isLoading) return <Text>Loading...</Text>
 
   return (
     <View className="flex-1 bg-background">
@@ -22,5 +22,5 @@ export function FeedListScreen({ navigation }: any) {
         )}
       />
     </View>
-  );
+  )
 }

@@ -18,16 +18,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.0.0",
-    "zod": "^3.23.0"
+    "@tanstack/react-query": "catalog:",
+    "zod": "catalog:"
   },
   "peerDependencies": {
-    "react": "^18.3.0"
+    "react": "catalog:"
   },
   "devDependencies": {
-    "@folio/tsconfig": "workspace:*",
     "@folio/shared": "workspace:*",
-    "tsup": "^8.3.0",
-    "typescript": "^5.6.0"
+    "@folio/tsconfig": "workspace:*",
+    "tsup": "catalog:",
+    "typescript": "catalog:"
   }
 }

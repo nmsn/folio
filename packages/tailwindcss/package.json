@@ -4,15 +4,17 @@
   "private": true,
   "type": "module",
   "main": "./theme.json",
-  "files": ["theme.json"],
+  "files": [
+    "theme.json"
+  ],
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "tailwindcss": "^3.4.0"
+    "tailwindcss": "catalog:"
   },
   "devDependencies": {
     "@folio/tsconfig": "workspace:*",
-    "typescript": "^5.6.0"
+    "typescript": "catalog:"
   }
 }

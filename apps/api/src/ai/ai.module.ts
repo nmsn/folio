@@ -1,6 +1,6 @@
-import { Module } from '@nestjs/common';
-import { ClaudeClient } from './clients/claude.client';
-import { OpenAIClient } from './clients/openai.client';
+import { Module } from '@nestjs/common'
+import { ClaudeClient } from './clients/claude.client'
+import { OpenAIClient } from './clients/openai.client'
 
 @Module({
   providers: [ClaudeClient, OpenAIClient],

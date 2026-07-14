@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { DatabaseService } from '../database/database.service';
+import { Injectable, Logger } from '@nestjs/common'
+import { DatabaseService } from '../database/database.service'
 
 /**
  * 默认数据 seed：mock user + 12 个默认 RSS 订阅源。
@@ -13,34 +13,34 @@ import { DatabaseService } from '../database/database.service';
  */
 @Injectable()
 export class DefaultFeedsSeed {
-  private readonly logger = new Logger(DefaultFeedsSeed.name);
+  private readonly logger = new Logger(DefaultFeedsSeed.name)
 
   constructor(private db: DatabaseService) {}
 
   async run() {
-    await this.ensureMockUser();
-    await this.ensureDefaultFeeds();
+    await this.ensureMockUser()
+    await this.ensureDefaultFeeds()
   }
 
   private async ensureMockUser() {
-    const existing = await this.db.queryOne('SELECT id FROM users WHERE id = $1', ['1']);
-    if (existing) return;
+    const existing = await this.db.queryOne('SELECT id FROM users WHERE id = $1', ['1'])
+    if (existing) return
 
-    const now = Math.floor(Date.now() / 1000);
+    const now = Math.floor(Date.now() / 1000)
     await this.db.query(
       `INSERT INTO users (id, email, name, password_hash, created_at, updated_at)
        VALUES ($1, $2, $3, $4, $5, $6)`,
-      ['1', 'test@test.com', 'Demo User', null, now, now]
-    );
-    this.logger.log('Seeded mock user (id=1, email=test@test.com)');
+      ['1', 'test@test.com', 'Demo User', null, now, now],
+    )
+    this.logger.log('Seeded mock user (id=1, email=test@test.com)')
   }
 
   private async ensureDefaultFeeds() {
     const defaults: Array<{
-      name: string;
-      url: string;
-      description: string;
-      category: string;
+      name: string
+      url: string
+      description: string
+      category: string
     }> = [
       // ── Tech News ───────────────────────────────────────────────
       {
@@ -125,32 +125,35 @@ export class DefaultFeedsSeed {
         description: '调查性网络安全报道',
         category: 'Security',
       },
-    ];
+    ]
 
-    const now = Math.floor(Date.now() / 1000);
-    let inserted = 0;
-    let skipped = 0;
+    const now = Math.floor(Date.now() / 1000)
+    let inserted = 0
+    let skipped = 0
     for (const feed of defaults) {
       // upsert by url —— 同 user 已有该 url 则跳过，避免重复
       const existing = await this.db.queryOne(
         'SELECT id FROM rss_sources WHERE user_id = $1 AND url = $2',
-        ['1', feed.url]
-      );
-      if (existing) { skipped++; continue; }
+        ['1', feed.url],
+      )
+      if (existing) {
+        skipped++
+        continue
+      }
 
-      const id = crypto.randomUUID();
+      const id = crypto.randomUUID()
       await this.db.query(
         `INSERT INTO rss_sources
            (id, user_id, name, url, description, category, is_active, created_at, updated_at)
          VALUES ($1, $2, $3, $4, $5, $6, 'true', $7, $8)`,
-        [id, '1', feed.name, feed.url, feed.description, feed.category, now, now]
-      );
-      inserted++;
+        [id, '1', feed.name, feed.url, feed.description, feed.category, now, now],
+      )
+      inserted++
     }
     if (inserted > 0) {
-      this.logger.log(`Default feeds: ${inserted} inserted, ${skipped} already present`);
+      this.logger.log(`Default feeds: ${inserted} inserted, ${skipped} already present`)
     } else {
-      this.logger.log(`Default feeds: all ${defaults.length} already present (no-op)`);
+      this.logger.log(`Default feeds: all ${defaults.length} already present (no-op)`)
     }
   }
 }

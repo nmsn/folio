@@ -5,31 +5,30 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./button": "./button",
-    "./input": "./input",
-    "./card": "./card",
-    "./sheet": "./sheet",
-    "./three-column-layout": "./three-column-layout",
-    "./utils": "./utils"
+    "./lib/utils": "./src/lib/utils.ts",
+    "./styles/globals.css": "./src/styles/globals.css"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "add": "pnpm dlx shadcn@latest add $@ -c ."
   },
   "peerDependencies": {
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0"
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "dependencies": {
-    "@radix-ui/react-dialog": "^1.1.15",
-    "@radix-ui/react-slot": "^1.1.0",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^2.5.0"
+    "@radix-ui/react-dialog": "catalog:",
+    "@radix-ui/react-slot": "catalog:",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "tailwind-merge": "catalog:"
   },
   "devDependencies": {
     "@folio/tailwindcss": "workspace:*",
     "@folio/tsconfig": "workspace:*",
-    "react": "^18.3.0",
-    "typescript": "^5.6.0"
+    "@types/react": "catalog:",
+    "lucide-react": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
   }
 }

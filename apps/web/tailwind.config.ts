@@ -1,5 +1,5 @@
-import type { Config } from 'tailwindcss';
-import sharedConfig from '@folio/tailwindcss/theme.json';
+import type { Config } from 'tailwindcss'
+import sharedConfig from '@folio/tailwindcss/theme.json'
 
 export default {
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
@@ -18,4 +18,4 @@ export default {
     },
   },
   plugins: [],
-} satisfies Config;
+} satisfies Config

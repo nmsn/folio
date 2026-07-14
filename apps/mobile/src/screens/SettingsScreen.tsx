@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native'
 
 export function SettingsScreen() {
   return (
@@ -11,5 +11,5 @@ export function SettingsScreen() {
         <Text>About</Text>
       </TouchableOpacity>
     </View>
-  );
+  )
 }
