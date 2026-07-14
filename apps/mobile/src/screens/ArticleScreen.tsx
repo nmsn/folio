@@ -11,7 +11,8 @@ export function ArticleScreen({ route }: any) {
     <ScrollView className="flex-1 bg-background p-4">
       <Text className="text-2xl font-bold mb-2">{article?.title}</Text>
       <Text className="text-sm text-muted-foreground mb-4">
-        {article?.author} • {article?.publishedAt}
+        {article?.author} •{' '}
+        {article?.publishedAt ? new Date(article.publishedAt).toLocaleString() : ''}
       </Text>
       <Text className="text-base">{article?.content || article?.description}</Text>
     </ScrollView>

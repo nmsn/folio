@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { aiTypeText, aiTypeList } from '../utils/ai-typewriter'
-import { getMockAiSummary } from '../data/mock-ai-summaries'
+import { client } from '../lib/orpc'
 
 interface AiSummaryProps {
   article: {
@@ -13,32 +13,37 @@ interface AiSummaryProps {
   onToggle: () => void
 }
 
+function estimateSavedMinutes(text: string): number {
+  const words = text.trim().split(/\s+/).filter(Boolean).length
+  return Math.max(1, Math.round(words / 200))
+}
+
 export function AiSummary({ article, open, onToggle }: AiSummaryProps) {
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState(false)
   const [tldr, setTldr] = useState('')
   const [points, setPoints] = useState<string[]>([])
   const [meta, setMeta] = useState('—')
+  const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
   const tldrRef = useRef<HTMLParagraphElement | null>(null)
   const pointsRef = useRef<HTMLUListElement | null>(null)
 
-  // 首次打开时启动 typewriter
   useEffect(() => {
-    if (open && !busy && !done) {
+    if (open && !busy && !done && !error) {
       void render()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
-  // 切换文章时重置状态
   useEffect(() => {
     setDone(false)
     setTldr('')
     setPoints([])
     setMeta('—')
     setBusy(false)
+    setError(null)
   }, [article.id])
 
   async function render() {
@@ -48,16 +53,43 @@ export function AiSummary({ article, open, onToggle }: AiSummaryProps) {
     setTldr('')
     setPoints([])
     setMeta('—')
-    const s = getMockAiSummary(article)
-    setMeta(`${s.source} · 节省 ~${s.saved} 分钟`)
-    setPoints(s.points)
-    // 等 350ms 让折叠展开动画播完
-    await new Promise((r) => setTimeout(r, 350))
-    setDone(true)
-    await aiTypeText(tldrRef.current, s.tldr, 26)
-    setTldr(s.tldr) // 同步 state 用于复制
-    await aiTypeList(pointsRef.current, s.points, 14)
-    setBusy(false)
+    setError(null)
+
+    try {
+      const res = await client.ai.summarize({ articleId: article.id })
+
+      if (res.queued) {
+        setMeta('Folio 摘要 · 已排队生成')
+        setTldr('摘要任务已加入队列，稍后刷新文章即可查看。')
+        setPoints([])
+        setDone(true)
+        setBusy(false)
+        return
+      }
+
+      const summary = res.result.summary
+      const keyPoints = res.result.keyPoints.filter(Boolean)
+      const saved = estimateSavedMinutes(
+        [article.description, summary].filter(Boolean).join(' '),
+      )
+      setMeta(`Folio 摘要 · 节省 ~${saved} 分钟`)
+      setPoints(keyPoints)
+
+      await new Promise((r) => setTimeout(r, 350))
+      setDone(true)
+      await aiTypeText(tldrRef.current, summary, 26)
+      setTldr(summary)
+      if (keyPoints.length > 0) {
+        await aiTypeList(pointsRef.current, keyPoints, 14)
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'AI 总结失败'
+      setError(message)
+      setMeta('—')
+      setDone(false)
+    } finally {
+      setBusy(false)
+    }
   }
 
   const copySummary = async () => {
@@ -102,11 +134,13 @@ export function AiSummary({ article, open, onToggle }: AiSummaryProps) {
         <span className="ai-status">
           {busy
             ? '正在总结…'
-            : done
-              ? '由 Folio 摘要生成'
-              : open
-                ? '加载中…'
-                : '点击展开 · 节省 ~6 分钟'}
+            : error
+              ? '总结失败 · 点击重试'
+              : done
+                ? '由 Folio 摘要生成'
+                : open
+                  ? '加载中…'
+                  : '点击展开 · AI 总结'}
         </span>
         <span className="ai-chev">
           <svg
@@ -124,6 +158,7 @@ export function AiSummary({ article, open, onToggle }: AiSummaryProps) {
       </button>
       <div className="ai-body" id="aiBody">
         <div className="ai-body-inner">
+          {error ? <p className="ai-tldr text-red-500">{error}</p> : null}
           <p className="ai-tldr" ref={tldrRef}>
             {tldr}
           </p>
@@ -139,6 +174,7 @@ export function AiSummary({ article, open, onToggle }: AiSummaryProps) {
               className={`ai-act ${copied ? 'is-copied' : ''}`}
               type="button"
               onClick={copySummary}
+              disabled={!tldr && points.length === 0}
             >
               {copied ? '已复制' : '复制'}
             </button>

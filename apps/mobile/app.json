@@ -24,7 +24,7 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "apiUrl": process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000"
+      "apiUrl": "http://localhost:4000"
     }
   }
 }

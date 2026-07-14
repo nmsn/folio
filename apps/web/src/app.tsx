@@ -9,10 +9,8 @@ import { FolioSidebar } from './components/FolioSidebar'
 import { FolioArticleList, type ArticleItem } from './components/FolioArticleList'
 import { FolioReader } from './components/FolioReader'
 
-const MOCK_USER = { id: '1', email: 'test@test.com', name: 'Test User' }
-
 function App() {
-  const user = MOCK_USER
+  // TODO(auth-ui): wire useAuth() once login/signup UI exists (session token via orpc helpers).
 
   // data
   const {

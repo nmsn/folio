@@ -27,11 +27,11 @@ const postcssTailwindPlugin = {
 export default createApp({
   server: {
     compatibilityDate: '2026-06-06',
+    // Alchemy / @folio/server local default (alchemy.run.ts listen port)
     devProxy: {
-      '/api': {
-        target: 'http://localhost:3000',
+      '/rpc': {
+        target: 'http://localhost:4000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

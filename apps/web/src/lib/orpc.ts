@@ -17,8 +17,9 @@ export function setSessionToken(token: string | null) {
 }
 
 function getApiBase() {
+  // Prefer VITE_API_URL; in browser default to same-origin so Vinxi devProxy `/rpc` → :4000 works.
   if (typeof window !== 'undefined') {
-    return (import.meta as { env?: Record<string, string> }).env?.VITE_API_URL || 'http://localhost:4000'
+    return (import.meta as { env?: Record<string, string> }).env?.VITE_API_URL || ''
   }
   return process.env.VITE_API_URL || process.env.API_URL || 'http://localhost:4000'
 }

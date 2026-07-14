@@ -11,7 +11,7 @@ export function ReadingListScreen({ navigation }: any) {
       renderItem={({ item }) => (
         <TouchableOpacity
           className="p-4 border-b border-border"
-          onPress={() => navigation.navigate('Article', { id: item.article_id })}
+          onPress={() => navigation.navigate('Article', { id: item.articleId })}
         >
           <Text className="font-semibold">{item.title}</Text>
           <Text className="text-sm text-muted-foreground">Status: {item.status}</Text>

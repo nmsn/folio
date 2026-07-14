@@ -3,24 +3,30 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
+    "preview": "electron-vite preview",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@folio/ui": "workspace:*",
-    "@tanstack/react-query": "catalog:",
-    "electron-vite": "^2.3.0",
-    "react": "catalog:",
-    "react-dom": "catalog:",
     "@folio/api": "workspace:*",
+    "@folio/ui": "workspace:*",
     "@orpc/client": "catalog:",
-    "@orpc/tanstack-query": "catalog:"
+    "@orpc/tanstack-query": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
     "@folio/tsconfig": "workspace:*",
     "@types/react": "catalog:",
-    "typescript": "catalog:"
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^35.0.0",
+    "electron-vite": "^3.0.0",
+    "typescript": "catalog:",
+    "vite": "^6.0.0"
   }
 }

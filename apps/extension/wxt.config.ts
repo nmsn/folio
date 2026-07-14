@@ -1,7 +1,10 @@
 import { defineConfig } from 'wxt'
 
 export default defineConfig({
-  entrypoints: {
-    sidebar: './src/main.ts',
+  modules: ['@wxt-dev/module-react'],
+  manifest: {
+    name: 'folio',
+    description: 'RSS reader with AI assistance',
+    permissions: ['sidePanel', 'storage'],
   },
 })

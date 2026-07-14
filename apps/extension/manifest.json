@@ -1,9 +1,0 @@
-{
-  "name": "folio",
-  "version": "1.0.0",
-  "description": "RSS reader with AI assistance",
-  "action": {
-    "default_title": "Open folio"
-  },
-  "sidebar": "true"
-}
