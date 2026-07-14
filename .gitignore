@@ -9,6 +9,8 @@ dist/
 .turbo/
 .output/
 .vinxi/
+.wxt/
+out/
 
 # Environment
 .env
