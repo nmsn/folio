@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const KEY = 'feedmind.articleState.v1';
+const KEY = 'folio.articleState.v1';
 
 interface ArticleState {
   read: boolean;

@@ -1,4 +1,4 @@
-// Shared types for FeedMind
+// Shared types for folio
 
 export type ID = string;
 

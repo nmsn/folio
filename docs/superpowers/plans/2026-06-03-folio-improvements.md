@@ -1,4 +1,4 @@
-# FeedMind Improvement Tasks
+# folio Improvement Tasks
 
 > **Status:** Active
 > **Created:** 2026-06-03
@@ -11,7 +11,7 @@ Analyzed three RSS-related projects for improvement opportunities:
 - **garss** - Python + React, parallel fetching, markdown-based README generation
 - **papr** - Tauri + React, desktop-focused
 
-Current feed-mind uses: NestJS + SQLite/Drizzle + Tanstack Start + Turborepo
+Current folio uses: NestJS + SQLite/Drizzle + Tanstack Start + Turborepo
 
 ---
 
@@ -259,7 +259,7 @@ async generateDailyDigest(userId: string) {
 
 ## Tech Stack Considerations
 
-| Feature | FeedFuse (Next.js) | feed-mind (NestJS + Turborepo) |
+| Feature | FeedFuse (Next.js) | folio (NestJS + Turborepo) |
 |---------|-------------------|--------------------------------|
 | OPML | Raw SQL | Drizzle ORM |
 | URL State | URL searchParams | Tanstack Router |
@@ -268,7 +268,7 @@ async generateDailyDigest(userId: string) {
 | Background Jobs | pg-boss | pg-boss (same) |
 | Auth | Custom | Better Auth |
 
-**Key difference:** feed-mind's multi-package monorepo means shared schemas in `packages/shared` are used across all apps (web, mobile, desktop, extension).
+**Key difference:** folio's multi-package monorepo means shared schemas in `packages/shared` are used across all apps (web, mobile, desktop, extension).
 
 ---
 
@@ -276,7 +276,7 @@ async generateDailyDigest(userId: string) {
 
 | File | Action |
 |------|--------|
-| `docs/superpowers/plans/2026-06-03-feedmind-improvements.md` | Create (this file) |
+| `docs/superpowers/plans/2026-06-03-folio-improvements.md` | Create (this file) |
 | `packages/shared/src/schemas/opml.schema.ts` | Create |
 | `packages/shared/src/schemas/pagination.schema.ts` | Create |
 | `apps/api/src/feeds/feeds.service.ts` | Modify - add OPML methods |

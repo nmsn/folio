@@ -5,7 +5,7 @@ import {
   extractFeedUrls,
   OPMLSchema,
   OPMLOutlineSchema,
-} from '@feed-mind/shared';
+} from '@folio/shared';
 
 describe('OPML Schema Validation', () => {
   it('should validate a correct OPML outline', () => {
@@ -127,7 +127,7 @@ describe('parseOPML', () => {
 
     const result = parseOPML(xml);
 
-    expect(result.head.title).toBe('FeedMind Subscriptions'); // default
+    expect(result.head.title).toBe('folio Subscriptions'); // default
     expect(result.body).toHaveLength(1);
   });
 });

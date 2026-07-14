@@ -13,7 +13,7 @@ export interface FetchFeedResult {
 
 export async function fetchFeed(url: string, options: FetchFeedOptions = {}): Promise<FetchFeedResult> {
   const headers: Record<string, string> = {
-    'User-Agent': 'FeedMind/1.0 RSS Reader',
+    'User-Agent': 'folio/1.0 RSS Reader',
     'Accept': 'application/rss+xml, application/xml, text/xml, application/atom+xml',
   };
 

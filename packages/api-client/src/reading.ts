@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import { UpdateReadingItemSchema } from '@feed-mind/shared/schemas';
+import { UpdateReadingItemSchema } from '@folio/shared/schemas';
 
 export const readingApi = {
   list: (limit = 50, offset = 0) =>

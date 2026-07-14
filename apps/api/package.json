@@ -1,5 +1,5 @@
 {
-  "name": "@feed-mind/api",
+  "name": "@folio/api",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",
-    "@feed-mind/db": "workspace:*",
-    "@feed-mind/shared": "workspace:*",
+    "@folio/db": "workspace:*",
+    "@folio/shared": "workspace:*",
     "@mozilla/readability": "^0.6.0",
     "@nestjs/common": "^10.4.0",
     "@nestjs/config": "^3.2.0",
@@ -27,7 +27,7 @@
     "zod": "^3.23.0"
   },
   "devDependencies": {
-    "@feed-mind/tsconfig": "workspace:*",
+    "@folio/tsconfig": "workspace:*",
     "@types/node": "^20.0.0",
     "concurrently": "^10.0.3",
     "tsx": "^4.19.0",

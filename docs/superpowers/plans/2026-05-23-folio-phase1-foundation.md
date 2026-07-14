@@ -1,4 +1,4 @@
-# FeedMind Phase 1: Foundation Implementation Plan
+# folio Phase 1: Foundation Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -13,7 +13,7 @@
 ## File Structure
 
 ```
-feed-mind/
+folio/
 ├── apps/
 │   ├── api/                      # NestJS backend
 │   │   └── src/
@@ -96,7 +96,7 @@ Update `apps/api/package.json`:
 
 ```json
 {
-  "name": "@feed-mind/api",
+  "name": "@folio/api",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -106,8 +106,8 @@ Update `apps/api/package.json`:
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@feed-mind/shared": "workspace:*",
-    "@feed-mind/db": "workspace:*",
+    "@folio/shared": "workspace:*",
+    "@folio/db": "workspace:*",
     "@nestjs/common": "^10.4.0",
     "@nestjs/core": "^10.4.0",
     "@nestjs/platform-express": "^10.4.0",
@@ -119,7 +119,7 @@ Update `apps/api/package.json`:
     "rxjs": "^7.8.0"
   },
   "devDependencies": {
-    "@feed-mind/tsconfig": "workspace:*",
+    "@folio/tsconfig": "workspace:*",
     "@types/node": "^20.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0"
@@ -597,7 +597,7 @@ Update `apps/web/package.json`:
 
 ```json
 {
-  "name": "@feed-mind/web",
+  "name": "@folio/web",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -607,8 +607,8 @@ Update `apps/web/package.json`:
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@feed-mind/shared": "workspace:*",
-    "@feed-mind/ui": "workspace:*",
+    "@folio/shared": "workspace:*",
+    "@folio/ui": "workspace:*",
     "@tanstack/react-start": "^1.0.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
@@ -620,7 +620,7 @@ Update `apps/web/package.json`:
     "@tanstack/react-query": "^5.0.0"
   },
   "devDependencies": {
-    "@feed-mind/tsconfig": "workspace:*",
+    "@folio/tsconfig": "workspace:*",
     "@types/react": "^18.3.0",
     "typescript": "^5.6.0",
     "tailwindcss": "^3.4.0",
@@ -690,7 +690,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b">
         <nav className="container mx-auto flex items-center justify-between p-4">
-          <h1 className="text-xl font-bold">FeedMind</h1>
+          <h1 className="text-xl font-bold">folio</h1>
           <div className="flex gap-4">
             <a href="/login" className="text-sm hover:underline">Login</a>
             <a href="/register" className="text-sm hover:underline">Register</a>
@@ -729,7 +729,7 @@ git commit -m "feat(web): set up Tanstack Start app shell"
 Create `apps/api/.env.example`:
 
 ```env
-DATABASE_URL=postgresql://user:password@localhost:5432/feedmind
+DATABASE_URL=postgresql://user:password@localhost:5432/folio
 PORT=3000
 NODE_ENV=development
 BETTER_AUTH_SECRET=your-secret-key-here
@@ -748,7 +748,7 @@ API_URL=http://localhost:3000
 Create `docker/.env.example`:
 
 ```env
-DATABASE_URL=postgresql://postgres:password@db:5432/feedmind
+DATABASE_URL=postgresql://postgres:password@db:5432/folio
 API_PORT=3000
 ```
 
@@ -781,7 +781,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
-      POSTGRES_DB: feedmind
+      POSTGRES_DB: folio
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -797,7 +797,7 @@ services:
       context: .
       dockerfile: Dockerfile.api
     environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-password}@db:5432/feedmind
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-password}@db:5432/folio
       PORT: 3000
       NODE_ENV: production
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
@@ -831,7 +831,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/ ./packages/
 COPY apps/api/ ./apps/api/
 RUN npm install -g pnpm && pnpm install --frozen-lockfile
-RUN pnpm build --filter @feed-mind/api
+RUN pnpm build --filter @folio/api
 
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -852,7 +852,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/ ./packages/
 COPY apps/web/ ./apps/web/
 RUN npm install -g pnpm && pnpm install --frozen-lockfile
-RUN pnpm build --filter @feed-mind/web
+RUN pnpm build --filter @folio/web
 
 FROM nginx:alpine AS runner
 COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
@@ -910,7 +910,7 @@ git commit -m "feat(docker): add self-hosted Docker configuration"
 
 ---
 
-**Plan complete and saved to `docs/superpowers/plans/2026-05-23-feedmind-phase1-foundation.md`**
+**Plan complete and saved to `docs/superpowers/plans/2026-05-23-folio-phase1-foundation.md`**
 
 ## Two Execution Options:
 

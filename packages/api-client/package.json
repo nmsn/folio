@@ -1,5 +1,5 @@
 {
-  "name": "@feed-mind/api-client",
+  "name": "@folio/api-client",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -25,8 +25,8 @@
     "react": "^18.3.0"
   },
   "devDependencies": {
-    "@feed-mind/tsconfig": "workspace:*",
-    "@feed-mind/shared": "workspace:*",
+    "@folio/tsconfig": "workspace:*",
+    "@folio/shared": "workspace:*",
     "tsup": "^8.3.0",
     "typescript": "^5.6.0"
   }

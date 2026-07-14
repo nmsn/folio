@@ -1,5 +1,5 @@
 {
-  "name": "@feed-mind/eslint-config",
+  "name": "@folio/eslint-config",
   "version": "0.0.0",
   "private": true,
   "type": "module",

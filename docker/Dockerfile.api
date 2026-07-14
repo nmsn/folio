@@ -4,7 +4,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/ ./packages/
 COPY apps/api/ ./apps/api/
 RUN npm install -g pnpm && pnpm install --frozen-lockfile
-RUN pnpm build --filter @feed-mind/api
+RUN pnpm build --filter @folio/api
 
 FROM node:20-alpine AS runner
 WORKDIR /app

@@ -1,4 +1,4 @@
-# FeedMind Phase 4: AI Features Implementation Plan
+# folio Phase 4: AI Features Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -559,7 +559,7 @@ git commit -m "feat(api): integrate AI module"
 
 ---
 
-**Plan saved to `docs/superpowers/plans/2026-05-23-feedmind-phase4-ai-features.md`**
+**Plan saved to `docs/superpowers/plans/2026-05-23-folio-phase4-ai-features.md`**
 
 ## Two Execution Options:
 

@@ -45,7 +45,7 @@
 - [ ] **Step 0.1：确认依赖状态**
 
 ```bash
-cd /Users/nmsn/Studio/feed-mind
+cd /Users/nmsn/Studio/folio
 ls apps/web/node_modules/.bin/vinxi 2>&1
 git status
 ```
@@ -229,7 +229,7 @@ git commit -m "feat(web): 添加 Folio 主题 CSS 变量（OKLCH 色彩 + 字体
 
 ```ts
 import type { Config } from 'tailwindcss';
-import sharedConfig from '@feed-mind/tailwindcss/theme.json';
+import sharedConfig from '@folio/tailwindcss/theme.json';
 
 export default {
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
@@ -406,7 +406,7 @@ git commit -m "feat(web): 新增 groupArticlesByDay 工具函数"
 ```ts
 import { useCallback, useEffect, useState } from 'react';
 
-const KEY = 'feedmind.articleState.v1';
+const KEY = 'folio.articleState.v1';
 
 interface ArticleState {
   read: boolean;
@@ -1444,7 +1444,7 @@ git commit -m "feat(web): 新增 FolioReader 组件（toolbar+kicker+title+bylin
 
 ```tsx
 import React, { useMemo, useState } from 'react';
-import { FolioThreeColumnLayout } from '@feed-mind/ui';
+import { FolioThreeColumnLayout } from '@folio/ui';
 import { useFeeds, useCreateFeed, useRefreshFeed } from './hooks/useFeeds';
 import { useArticles, useArticle } from './hooks/useArticles';
 import { formatRelativeTime } from './utils/format-relative-time';
@@ -1817,7 +1817,7 @@ git commit -m "feat(web): 移植设计稿全部组件 CSS（topbar/nav/list/read
 - [ ] **Step 16.2：清理 + 列出 commits**
 
 ```bash
-cd /Users/nmsn/Studio/feed-mind
+cd /Users/nmsn/Studio/folio
 git status
 git log --oneline 75fe4c5^..HEAD
 ```

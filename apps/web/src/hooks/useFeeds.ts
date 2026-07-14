@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { feedsApi } from '@feed-mind/api-client';
+import { feedsApi } from '@folio/api-client';
 
 export function useFeeds() {
   return useQuery({

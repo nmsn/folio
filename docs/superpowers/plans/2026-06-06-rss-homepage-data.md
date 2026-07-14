@@ -34,7 +34,7 @@
 - [ ] **Step 0.2：确认项目根有 `.env` 或能注入 `DATABASE_URL`**
 
 运行：`ls -la .env* 2>/dev/null || echo "no .env files"`
-预期：可能没有 .env 文件，OK；`apps/api` 通过默认 `postgresql://postgres:password@localhost:5432/feedmind` 即可连接
+预期：可能没有 .env 文件，OK；`apps/api` 通过默认 `postgresql://postgres:password@localhost:5432/folio` 即可连接
 
 ---
 
@@ -227,7 +227,7 @@ export const apiClient = new ApiClient();
 
 - [ ] **Step 2.2：重新构建 api-client**
 
-运行：`pnpm --filter @feed-mind/api-client build`
+运行：`pnpm --filter @folio/api-client build`
 预期：tsup 构建成功，`packages/api-client/dist/index.js` 文件被更新（`git status` 可见 `dist/` 改动或产物已是最新的 —— 视项目 `.gitignore` 而定）
 
 - [ ] **Step 2.3：commit**
@@ -277,7 +277,7 @@ git commit -m "fix(api-client): base URL 由 http://localhost:3000 改为 /api�
 }
 ```
 
-变更要点：给 `dev` 任务增加 `"dependsOn": ["^build"]`，确保 `apps/web` 的 `dev` 在启动前先构建 `@feed-mind/api-client` 等依赖包。
+变更要点：给 `dev` 任务增加 `"dependsOn": ["^build"]`，确保 `apps/web` 的 `dev` 在启动前先构建 `@folio/api-client` 等依赖包。
 
 - [ ] **Step 3.2：编辑 `apps/web/package.json` 让 dev 脚本注入 PORT=5173**
 
@@ -399,7 +399,7 @@ import {
   Sidebar,
   ArticleList,
   Reader,
-} from '@feed-mind/ui';
+} from '@folio/ui';
 import { useFeeds, useCreateFeed } from './hooks/useFeeds';
 ```
 
@@ -412,7 +412,7 @@ import {
   Sidebar,
   ArticleList,
   Reader,
-} from '@feed-mind/ui';
+} from '@folio/ui';
 import { useFeeds, useCreateFeed, useRefreshFeed } from './hooks/useFeeds';
 import { useArticles, useArticle } from './hooks/useArticles';
 import { formatRelativeTime } from './utils/format-relative-time';
@@ -710,7 +710,7 @@ git commit -m "feat(web): Reader 接入 useArticle 数据，添加空/错/加载
 - [ ] **Step 6.1：启动 PostgreSQL（docker）**
 
 运行：`pnpm docker:dev`（后台运行或新终端）
-预期：postgres 容器启动，`localhost:5432` 可连接，db `feedmind` 存在
+预期：postgres 容器启动，`localhost:5432` 可连接，db `folio` 存在
 
 - [ ] **Step 6.2：执行数据库迁移**
 

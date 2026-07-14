@@ -1,5 +1,5 @@
 {
-  "extends": ["@feed-mind/tsconfig/node"],
+  "extends": ["@folio/tsconfig/node"],
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "./src",
@@ -9,8 +9,8 @@
     "esModuleInterop": true,
     "paths": {
       "~/*": ["./src/*"],
-      "@feed-mind/shared/*": ["../../packages/shared/src/*"],
-      "@feed-mind/db/*": ["../../packages/db/src/*"]
+      "@folio/shared/*": ["../../packages/shared/src/*"],
+      "@folio/db/*": ["../../packages/db/src/*"]
     },
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true

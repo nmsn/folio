@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { FeedsRepository } from './feeds.repository';
 import { CreateFeedInput, UpdateFeedInput } from './dto/create-feed.dto';
-import { parseOPML, generateOPML, extractFeedUrls, type OPML } from '@feed-mind/shared';
+import { parseOPML, generateOPML, extractFeedUrls, type OPML } from '@folio/shared';
 
 @Injectable()
 export class FeedsService {
@@ -51,7 +51,7 @@ export class FeedsService {
     const opml: OPML = {
       version: '2.0',
       head: {
-        title: 'FeedMind Subscriptions',
+        title: 'folio Subscriptions',
         dateCreated: new Date().toUTCString(),
       },
       body: feeds.map((feed: Record<string, unknown>) => ({

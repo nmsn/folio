@@ -1,5 +1,5 @@
 {
-  "extends": "@feed-mind/tsconfig/base.json",
+  "extends": "@folio/tsconfig/base.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src"

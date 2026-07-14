@@ -47,7 +47,7 @@ export class FeedsController {
 
   @Get('export/opml')
   @Header('Content-Type', 'text/xml; charset=utf-8')
-  @Header('Content-Disposition', 'attachment; filename="feedmind-subscriptions.opml"')
+  @Header('Content-Disposition', 'attachment; filename="folio-subscriptions.opml"')
   async exportOPML(@Req() req: Request, @Res() res: Response) {
     const userId = (req as { user: { id: string } }).user?.id;
     const opmlXml = await this.feeds.exportToOPML(userId);

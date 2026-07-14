@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import { AIAgentRequestSchema } from '@feed-mind/shared/schemas';
+import { AIAgentRequestSchema } from '@folio/shared/schemas';
 
 export const aiApi = {
   summarize: (articleId: string) => {

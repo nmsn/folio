@@ -132,7 +132,7 @@ function formatRelativeTime(date: Date | number): string {
    - 保留对 `import.meta.env.VITE_API_URL` 的可选支持（如有需要，后续可加）
 
 3. **`packages/api-client`** 需重新构建
-   - `pnpm --filter @feed-mind/api-client build`
+   - `pnpm --filter @folio/api-client build`
    - 原因：`main` 字段指向 `./dist/index.js`，web 端 import 的是构建产物
 
 4. **`apps/web/src/app.tsx`** —— 主要改动
@@ -178,7 +178,7 @@ function formatRelativeTime(date: Date | number): string {
 
 ## 风险与回滚
 
-- **风险 1**：api-client 改动未重新构建 → web 端继续用旧 dist。**缓解**：开发者本地明确运行 `pnpm --filter @feed-mind/api-client build`；`turbo.json` 中追加 `web#dev` 对 `api-client#build` 的依赖（作为本期改动的一部分，会同时修改 `turbo.json`）。
+- **风险 1**：api-client 改动未重新构建 → web 端继续用旧 dist。**缓解**：开发者本地明确运行 `pnpm --filter @folio/api-client build`；`turbo.json` 中追加 `web#dev` 对 `api-client#build` 的依赖（作为本期改动的一部分，会同时修改 `turbo.json`）。
 - **风险 2**：Vite 代理配置后，`/api` 在生产构建中不存在。**缓解**：本期仅限开发期；生产部署时由反向代理或绝对 URL 处理，不在本期范围。
 - **风险 3**：`articles.content` 为 null 时 `dangerouslySetInnerHTML` 渲染空字符串。**缓解**：fallback 到 `description`，再 fallback 到空。
 - **回滚**：所有改动集中在 `app.tsx`、`vite.config.ts`、`client.ts` 三个文件，git revert 即可。
