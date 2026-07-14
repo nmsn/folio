@@ -97,6 +97,10 @@ export const server = await Worker('server', {
   eventSources: [FEED_QUEUE, FULLTEXT_QUEUE, AI_QUEUE],
   bindings: {
     CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:3000',
+    BETTER_AUTH_SECRET: alchemy.secret(
+      process.env.BETTER_AUTH_SECRET || 'dev-better-auth-secret-change-me-32chars',
+    ),
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || 'http://localhost:4000',
     ANTHROPIC_API_KEY: alchemy.secret(process.env.ANTHROPIC_API_KEY || ''),
     R2_PUBLIC_DOMAIN: BUCKET.devDomain || process.env.R2_PUBLIC_DOMAIN || '',
     KV,

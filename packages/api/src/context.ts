@@ -1,8 +1,8 @@
 import type { Context as HonoContext } from 'hono'
 import { drizzle } from 'drizzle-orm/d1'
-import { eq, and, gt } from 'drizzle-orm'
-import { users, sessions } from '@folio/db'
+import * as schema from '@folio/db'
 import type { CloudflareEnv } from './env'
+import { createAuth } from './auth-server'
 
 export type SessionUser = {
   id: string
@@ -11,52 +11,28 @@ export type SessionUser = {
   avatarUrl: string | null
 }
 
-function extractSessionId(c: HonoContext): string | null {
-  const auth = c.req.header('authorization')
-  if (auth?.toLowerCase().startsWith('bearer ')) {
-    return auth.slice(7).trim() || null
-  }
-  const cookie = c.req.header('cookie')
-  if (!cookie) return null
-  const match = cookie.match(/(?:^|;\s*)session=([^;]+)/)
-  return match?.[1] ? decodeURIComponent(match[1]) : null
-}
-
 export async function createContext(c: HonoContext<{ Bindings: CloudflareEnv }>) {
   const env = c.env
-  const db = drizzle(env.DB)
-  const sessionId = extractSessionId(c)
+  const db = drizzle(env.DB, { schema })
+  const auth = createAuth(env)
 
-  let user: SessionUser | null = null
-  if (sessionId) {
-    const row = await db
-      .select({
-        id: users.id,
-        email: users.email,
-        name: users.name,
-        avatarUrl: users.avatarUrl,
-        expiresAt: sessions.expiresAt,
-      })
-      .from(sessions)
-      .innerJoin(users, eq(sessions.userId, users.id))
-      .where(and(eq(sessions.id, sessionId), gt(sessions.expiresAt, new Date())))
-      .get()
+  const session = await auth.api.getSession({ headers: c.req.raw.headers })
 
-    if (row) {
-      user = {
-        id: row.id,
-        email: row.email,
-        name: row.name,
-        avatarUrl: row.avatarUrl,
+  const user: SessionUser | null = session?.user
+    ? {
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.name,
+        avatarUrl: session.user.image ?? null,
       }
-    }
-  }
+    : null
 
   return {
     env,
     db,
+    auth,
     user,
-    sessionId,
+    session: session?.session ?? null,
     request: c.req.raw,
   }
 }

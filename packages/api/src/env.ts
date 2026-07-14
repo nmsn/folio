@@ -12,6 +12,8 @@ export type CloudflareEnv = {
   KV?: any
   BUCKET?: any
   CORS_ORIGIN?: string
+  BETTER_AUTH_SECRET: string
+  BETTER_AUTH_URL?: string
   ANTHROPIC_API_KEY?: string
   R2_PUBLIC_DOMAIN?: string
   R2_ACCOUNT_ID?: string

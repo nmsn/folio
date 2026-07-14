@@ -4,7 +4,7 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { RPCHandler } from '@orpc/server/fetch'
 import { onError } from '@orpc/server'
-import { appRouter } from '@folio/api'
+import { appRouter, createAuth } from '@folio/api'
 import { createContext } from '@folio/api/context'
 import type { CloudflareEnv } from '@folio/api/env'
 import { handleQueueBatch, type QueueMessage } from './workers/queue'
@@ -27,9 +27,15 @@ app.use(
     },
     allowMethods: ['GET', 'POST', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
+    exposeHeaders: ['set-auth-token'],
     credentials: true,
   }),
 )
+
+app.on(['POST', 'GET'], '/api/auth/*', (c) => {
+  const auth = createAuth(c.env)
+  return auth.handler(c.req.raw)
+})
 
 const rpcHandler = new RPCHandler(appRouter, {
   interceptors: [

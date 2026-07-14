@@ -4,7 +4,15 @@ import { articlesApi } from './articles'
 import { feedsApi } from './feeds'
 import { readingApi } from './reading'
 import { aiApi } from './ai'
-import { authApi } from './auth'
+
+export { createAuth } from './auth-server'
+export type { FolioAuth } from './auth-server'
+export {
+  signInWithEmail,
+  signUpWithEmail,
+  signOutWithBearer,
+  type BearerAuthUser,
+} from './auth-bearer'
 
 export const appRouter = {
   healthCheck: {
@@ -17,7 +25,6 @@ export const appRouter = {
   feeds: feedsApi,
   reading: readingApi,
   ai: aiApi,
-  auth: authApi,
 }
 
 export type AppRouter = typeof appRouter
