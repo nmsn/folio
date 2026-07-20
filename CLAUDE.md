@@ -54,4 +54,4 @@ pnpm db:migrate  # 执行数据库迁移
 
 ## 项目特定约定
 
-（由开发者在此处补充）
+- **`apps/mobile` 暂缓开发**：现阶段不主动开发 Expo 移动端。全局扫描、全仓任务、依赖升级等默认跳过该目录，除非明确要求处理 mobile。详见 `apps/mobile/AGENTS.md`。
