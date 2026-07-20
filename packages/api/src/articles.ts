@@ -1,11 +1,18 @@
 import { ORPCError, os } from '@orpc/server'
-import { eq, and, or, lt, desc, SQL } from 'drizzle-orm'
-import { articles } from '@folio/db'
+import { eq, and, or, lt, desc, inArray, SQL } from 'drizzle-orm'
+import { articles, articleStates } from '@folio/db'
 import type { Context } from './context'
 import { createPaginatedResponse, type Cursor } from './lib/pagination'
 import { z } from 'zod'
 
 const o = os.$context<Context>()
+
+function requireUser(context: Context) {
+  if (!context.user) {
+    throw new ORPCError('UNAUTHORIZED', { message: 'Not authenticated' })
+  }
+  return context.user
+}
 
 const BySourceInput = z.object({
   sourceId: z.string(),
@@ -89,5 +96,119 @@ export const articlesApi = {
         : undefined
 
     return createPaginatedResponse(items, hasMore, nextCursor)
+  }),
+
+  /** Return isRead map for the given article ids (current user). */
+  states: o
+    .input(z.object({ articleIds: z.array(z.string()).max(500) }))
+    .handler(async ({ context, input }) => {
+      const user = requireUser(context)
+      if (input.articleIds.length === 0) return {} as Record<string, { isRead: boolean }>
+
+      const rows = await context.db
+        .select({
+          articleId: articleStates.articleId,
+          isRead: articleStates.isRead,
+        })
+        .from(articleStates)
+        .where(
+          and(
+            eq(articleStates.userId, user.id),
+            inArray(articleStates.articleId, input.articleIds),
+          ),
+        )
+        .all()
+
+      const map: Record<string, { isRead: boolean }> = {}
+      for (const id of input.articleIds) {
+        map[id] = { isRead: false }
+      }
+      for (const row of rows) {
+        map[row.articleId] = { isRead: Boolean(row.isRead) }
+      }
+      return map
+    }),
+
+  setRead: o
+    .input(z.object({ articleId: z.string(), isRead: z.boolean() }))
+    .handler(async ({ context, input }) => {
+      const user = requireUser(context)
+      const article = await context.db
+        .select()
+        .from(articles)
+        .where(eq(articles.id, input.articleId))
+        .get()
+      if (!article) throw new ORPCError('NOT_FOUND', { message: 'Article not found' })
+
+      const existing = await context.db
+        .select()
+        .from(articleStates)
+        .where(
+          and(eq(articleStates.userId, user.id), eq(articleStates.articleId, input.articleId)),
+        )
+        .get()
+
+      const now = new Date()
+      if (existing) {
+        const [updated] = await context.db
+          .update(articleStates)
+          .set({ isRead: input.isRead, updatedAt: now })
+          .where(eq(articleStates.id, existing.id))
+          .returning()
+        return updated
+      }
+
+      const [created] = await context.db
+        .insert(articleStates)
+        .values({
+          id: crypto.randomUUID(),
+          userId: user.id,
+          articleId: input.articleId,
+          isRead: input.isRead,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning()
+      return created
+    }),
+
+  markRead: o.input(z.object({ articleId: z.string() })).handler(async ({ context, input }) => {
+    const user = requireUser(context)
+    const article = await context.db
+      .select()
+      .from(articles)
+      .where(eq(articles.id, input.articleId))
+      .get()
+    if (!article) throw new ORPCError('NOT_FOUND', { message: 'Article not found' })
+
+    const existing = await context.db
+      .select()
+      .from(articleStates)
+      .where(and(eq(articleStates.userId, user.id), eq(articleStates.articleId, input.articleId)))
+      .get()
+
+    const now = new Date()
+    if (existing) {
+      if (existing.isRead) return existing
+      const [updated] = await context.db
+        .update(articleStates)
+        .set({ isRead: true, updatedAt: now })
+        .where(eq(articleStates.id, existing.id))
+        .returning()
+      return updated
+    }
+
+    const [created] = await context.db
+      .insert(articleStates)
+      .values({
+        id: crypto.randomUUID(),
+        userId: user.id,
+        articleId: input.articleId,
+        isRead: true,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning()
+    return created
   }),
 }

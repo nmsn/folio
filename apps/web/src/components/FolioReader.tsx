@@ -64,7 +64,10 @@ export function FolioReader({
     )
   }
 
-  const html = (article.description as string | null | undefined) ?? ''
+  const html =
+    (article.content as string | null | undefined) ||
+    (article.description as string | null | undefined) ||
+    ''
   const date = new Date(article.publishedAt as string | number | Date)
   const dateStr = `${date.getFullYear()} / ${String(date.getMonth() + 1).padStart(2, '0')} / ${String(date.getDate()).padStart(2, '0')}`
 

@@ -2,10 +2,12 @@ import { drizzle } from 'drizzle-orm/d1'
 import { eq, or, isNull, lt, and } from 'drizzle-orm'
 import { rssSources } from '@folio/db'
 import type { CloudflareEnv } from '@folio/api/env'
+import { enqueueOrFetchFeed } from '@folio/api'
 
 /**
  * Cron-triggered feed refresh scheduler.
  * Enqueues feed.fetch jobs for active sources that haven't been fetched recently.
+ * When FEED_QUEUE is unbound (local), runs fetches inline via enqueueOrFetchFeed.
  */
 export async function runFeedScheduler(env: CloudflareEnv) {
   console.log('Running feed refresh scheduler...')
@@ -23,25 +25,19 @@ export async function runFeedScheduler(env: CloudflareEnv) {
     )
     .all()
 
-  if (!env.FEED_QUEUE) {
-    console.warn('FEED_QUEUE not bound — running fetch inline for', feeds.length, 'feeds')
-    const { handleFeedFetch } = await import('../feed-fetch.handler')
-    for (const feed of feeds) {
-      try {
-        await handleFeedFetch(env, feed.id)
-      } catch (err) {
-        console.error(`Scheduler fetch failed for ${feed.id}:`, err)
-      }
-    }
-    return { enqueued: feeds.length, mode: 'inline' as const }
-  }
-
   let enqueued = 0
+  let mode: 'queue' | 'inline' = env.FEED_QUEUE ? 'queue' : 'inline'
   for (const feed of feeds) {
-    await env.FEED_QUEUE.send({ type: 'feed.fetch', feedId: feed.id })
-    enqueued++
+    try {
+      const result = await enqueueOrFetchFeed(env, feed.id)
+      if (result.queued) mode = 'queue'
+      else mode = 'inline'
+      enqueued++
+    } catch (err) {
+      console.error(`Scheduler fetch failed for ${feed.id}:`, err)
+    }
   }
 
-  console.log(`Enqueued ${enqueued} feed.fetch jobs`)
-  return { enqueued, mode: 'queue' as const }
+  console.log(`Scheduled ${enqueued} feed.fetch jobs (mode=${mode})`)
+  return { enqueued, mode }
 }

@@ -29,6 +29,7 @@
     "@orpc/tanstack-query": "catalog:",
     "better-auth": "catalog:",
     "drizzle-orm": "catalog:",
+    "fast-xml-parser": "^5.10.0",
     "hono": "catalog:",
     "zod": "catalog:"
   },

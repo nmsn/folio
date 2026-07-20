@@ -3,13 +3,9 @@ import { drizzle } from 'drizzle-orm/d1'
 import * as schema from '@folio/db'
 import type { CloudflareEnv } from './env'
 import { createAuth } from './auth-server'
+import { ensureLocalUser, type SessionUser } from './local-user'
 
-export type SessionUser = {
-  id: string
-  email: string
-  name: string
-  avatarUrl: string | null
-}
+export type { SessionUser }
 
 export async function createContext(c: HonoContext<{ Bindings: CloudflareEnv }>) {
   const env = c.env
@@ -18,7 +14,7 @@ export async function createContext(c: HonoContext<{ Bindings: CloudflareEnv }>)
 
   const session = await auth.api.getSession({ headers: c.req.raw.headers })
 
-  const user: SessionUser | null = session?.user
+  let user: SessionUser | null = session?.user
     ? {
         id: session.user.id,
         email: session.user.email,
@@ -26,6 +22,11 @@ export async function createContext(c: HonoContext<{ Bindings: CloudflareEnv }>)
         avatarUrl: session.user.image ?? null,
       }
     : null
+
+  // No-login MVP: fall back to a fixed local user so feeds/read-state work without auth.
+  if (!user) {
+    user = await ensureLocalUser(db)
+  }
 
   return {
     env,

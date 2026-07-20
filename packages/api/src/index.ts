@@ -13,6 +13,9 @@ export {
   signOutWithBearer,
   type BearerAuthUser,
 } from './auth-bearer'
+export { handleFeedFetch, enqueueOrFetchFeed } from './lib/feed-fetch'
+export type { FeedFetchMessage, FeedFetchResult } from './lib/feed-fetch'
+export { LOCAL_USER_ID, ensureLocalUser } from './local-user'
 
 export const appRouter = {
   healthCheck: {

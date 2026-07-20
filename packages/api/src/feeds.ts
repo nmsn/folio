@@ -5,6 +5,7 @@ import { z } from 'zod'
 import type { Context } from './context'
 import { CreateRSSSourceSchema, UpdateRSSSourceSchema } from './lib/schemas'
 import { parseOPML, generateOPML, extractFeedUrls, type OPML } from './lib/opml'
+import { enqueueOrFetchFeed } from './lib/feed-fetch'
 
 const o = os.$context<Context>()
 
@@ -15,13 +16,18 @@ function requireUser(context: Context) {
   return context.user
 }
 
+function defaultFeedName(url: string, name?: string) {
+  if (name?.trim()) return name.trim()
+  try {
+    return new URL(url).hostname
+  } catch {
+    return 'Untitled Feed'
+  }
+}
+
 export const feedsApi = {
   list: o.handler(async ({ context }) => {
-    const user = context.user
-    if (!user) {
-      // Dev bypass: unauthenticated returns all feeds (matches NestJS behavior)
-      return context.db.select().from(rssSources).orderBy(desc(rssSources.createdAt)).all()
-    }
+    const user = requireUser(context)
     return context.db
       .select()
       .from(rssSources)
@@ -31,13 +37,14 @@ export const feedsApi = {
   }),
 
   get: o.input(z.object({ id: z.string() })).handler(async ({ context, input }) => {
+    const user = requireUser(context)
     const feed = await context.db
       .select()
       .from(rssSources)
       .where(eq(rssSources.id, input.id))
       .get()
     if (!feed) throw new ORPCError('NOT_FOUND', { message: 'Feed not found' })
-    if (context.user && feed.userId !== context.user.id) {
+    if (feed.userId !== user.id) {
       throw new ORPCError('FORBIDDEN', { message: 'Forbidden' })
     }
     return feed
@@ -52,7 +59,7 @@ export const feedsApi = {
       .values({
         id,
         userId: user.id,
-        name: input.name,
+        name: defaultFeedName(input.url, input.name),
         url: input.url,
         description: input.description,
         category: input.category,
@@ -61,7 +68,17 @@ export const feedsApi = {
         updatedAt: now,
       })
       .returning()
-    return feed
+
+    const fetchResult = await enqueueOrFetchFeed(context.env, id)
+
+    // Re-read in case inline fetch updated name/description from channel metadata
+    const refreshed = await context.db.select().from(rssSources).where(eq(rssSources.id, id)).get()
+
+    return {
+      ...(refreshed ?? feed),
+      queued: fetchResult.queued,
+      newArticles: fetchResult.newArticles ?? 0,
+    }
   }),
 
   update: o
@@ -100,24 +117,24 @@ export const feedsApi = {
   }),
 
   refresh: o.input(z.object({ id: z.string() })).handler(async ({ context, input }) => {
-    const user = context.user
+    const user = requireUser(context)
     const feed = await context.db
       .select()
       .from(rssSources)
       .where(eq(rssSources.id, input.id))
       .get()
     if (!feed) throw new ORPCError('NOT_FOUND', { message: 'Feed not found' })
-    if (user && feed.userId !== user.id) {
+    if (feed.userId !== user.id) {
       throw new ORPCError('FORBIDDEN', { message: 'Forbidden' })
     }
 
-    if (context.env.FEED_QUEUE) {
-      await context.env.FEED_QUEUE.send({ type: 'feed.fetch', feedId: input.id })
-      return { success: true, queued: true }
+    const result = await enqueueOrFetchFeed(context.env, input.id)
+    return {
+      success: true,
+      queued: result.queued,
+      newArticles: result.newArticles ?? 0,
+      feedId: input.id,
     }
-
-    // Queue not bound yet (pre-Phase 5) — caller/worker may handle synchronously
-    return { success: true, queued: false, feedId: input.id }
   }),
 
   exportOpml: o.handler(async ({ context }) => {
@@ -196,6 +213,8 @@ export const feedsApi = {
               updatedAt: now,
             })
             .returning()
+
+          await enqueueOrFetchFeed(context.env, id)
 
           results.feeds.push({ name: feed.name, url: feed.url, id: feed.id })
           results.imported++

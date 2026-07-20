@@ -92,7 +92,8 @@ export const server = await Worker('server', {
   entrypoint: 'src/index.ts',
   compatibility: 'node',
   compatibilityFlags: ['enable_request_signal'],
-  // Refresh feeds every 15 minutes
+  // Cron every 15m → scheduled handler → runFeedScheduler.
+  // With FEED_QUEUE bound (alchemy dev/deploy), jobs are queued; otherwise fetches run inline.
   crons: ['*/15 * * * *'],
   eventSources: [FEED_QUEUE, FULLTEXT_QUEUE, AI_QUEUE],
   bindings: {

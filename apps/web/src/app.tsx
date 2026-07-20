@@ -1,46 +1,26 @@
 import React, { useMemo, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { FolioThreeColumnLayout } from './components/FolioThreeColumnLayout'
-import { AuthScreen } from './components/AuthScreen'
 import { useFeeds, useCreateFeed, useRefreshFeed } from './hooks/useFeeds'
 import { useArticles, useArticle } from './hooks/useArticles'
 import { useArticleState } from './hooks/useArticleState'
 import { useGroupedFeeds, type Feed } from './hooks/useGroupedFeeds'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
-import { useAuth } from './hooks/useAuth'
 import { FolioSidebar } from './components/FolioSidebar'
 import { FolioArticleList, type ArticleItem } from './components/FolioArticleList'
 import { FolioReader } from './components/FolioReader'
+import { AddFeedDialog } from './components/AddFeedDialog'
+import { orpc } from './lib/orpc'
 
 function App() {
-  const { user, loading: authLoading, signin, signup, signout } = useAuth()
-
-  if (authLoading) {
-    return (
-      <div className="auth-screen">
-        <p className="auth-sub">加载会话…</p>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return <AuthScreen onSignIn={signin} onSignUp={signup} />
-  }
-
-  return <ReaderApp userName={user.name} onSignOut={signout} />
+  return <ReaderApp />
 }
 
-function ReaderApp({
-  userName,
-  onSignOut,
-}: {
-  userName: string
-  onSignOut: () => Promise<void>
-}) {
-  // data
+function ReaderApp() {
+  const queryClient = useQueryClient()
   const {
     data: feedsRaw = [],
     isLoading: feedsLoading,
-    isError: feedsError,
     refetch: refetchFeeds,
   } = useFeeds()
   const feeds = feedsRaw as unknown as Feed[]
@@ -49,6 +29,7 @@ function ReaderApp({
   const [selectedSmartView, setSelectedSmartView] = useState('all')
   const [filter, setFilter] = useState<'all' | 'unread' | 'starred'>('all')
   const [showAddFeed, setShowAddFeed] = useState(false)
+  const [addFeedError, setAddFeedError] = useState<string | null>(null)
 
   const {
     data: articles = [],
@@ -65,28 +46,29 @@ function ReaderApp({
   } = useArticle(selectedArticleId ?? '')
   const selectedArticle = selectedArticleRaw as unknown as ArticleItem | null | undefined
 
-  // refresh
+  const createFeed = useCreateFeed()
   const refreshFeed = useRefreshFeed()
   const [refreshing, setRefreshing] = useState(false)
-  const [refreshError, setRefreshError] = useState<string | null>(null)
   const handleRefreshFeed = async () => {
     if (!selectedFeedId) return
     setRefreshing(true)
-    setRefreshError(null)
     try {
-      await refreshFeed.mutateAsync(selectedFeedId)
-      refetchArticles()
+      const result = await refreshFeed.mutateAsync(selectedFeedId)
+      await refetchArticles()
+      if (result.queued) {
+        await new Promise((r) => setTimeout(r, 1500))
+        await refetchArticles()
+      }
     } catch (err) {
-      setRefreshError(err instanceof Error ? err.message : '刷新失败')
+      console.error(err)
     } finally {
       setRefreshing(false)
     }
   }
 
-  // state (read/starred, localStorage)
-  const { isRead, isStarred, markRead, toggleStarred } = useArticleState()
+  const articleIds = useMemo(() => articleList.map((a) => a.id), [articleList])
+  const { isRead, isStarred, markRead, toggleStarred } = useArticleState(articleIds)
 
-  // derived
   const unreadCount = useMemo(
     () => articleList.filter((a) => !isRead(a.id)).length,
     [articleList, isRead],
@@ -114,7 +96,6 @@ function ReaderApp({
     [articleList],
   )
 
-  // selection handlers
   const onSelectArticle = (id: string) => {
     setSelectedArticleId(id)
     if (!isRead(id)) markRead(id)
@@ -132,7 +113,6 @@ function ReaderApp({
       onSelectArticle(sortedArticles[sortedIdx + 1].id)
   }
 
-  // keyboard
   useKeyboardShortcuts({
     onNext,
     onPrev,
@@ -144,6 +124,24 @@ function ReaderApp({
       aiBtn?.click()
     },
   })
+
+  const handleAddFeed = async (input: { url: string; name?: string }) => {
+    setAddFeedError(null)
+    try {
+      const feed = await createFeed.mutateAsync(input)
+      setShowAddFeed(false)
+      setSelectedFeedId(feed.id)
+      setSelectedArticleId(null)
+      await refetchFeeds()
+      await queryClient.invalidateQueries({ queryKey: orpc.articles.key() })
+      if (feed.queued) {
+        await new Promise((r) => setTimeout(r, 1500))
+        await queryClient.invalidateQueries({ queryKey: orpc.articles.key() })
+      }
+    } catch (err) {
+      setAddFeedError(err instanceof Error ? err.message : '添加失败')
+    }
+  }
 
   return (
     <>
@@ -158,9 +156,11 @@ function ReaderApp({
             setSelectedFeedId(id)
             setSelectedArticleId(null)
           }}
-          onAddFeed={() => setShowAddFeed(true)}
-          userName={userName}
-          onSignOut={() => void onSignOut()}
+          onAddFeed={() => {
+            setAddFeedError(null)
+            setShowAddFeed(true)
+          }}
+          userName={feedsLoading ? '…' : 'Local'}
         />
         <FolioArticleList
           articles={sortedArticles}
@@ -205,6 +205,13 @@ function ReaderApp({
           }
         />
       </FolioThreeColumnLayout>
+      <AddFeedDialog
+        open={showAddFeed}
+        onOpenChange={setShowAddFeed}
+        onSubmit={handleAddFeed}
+        submitting={createFeed.isPending}
+        error={addFeedError}
+      />
       <div className="keyhint" aria-hidden="true">
         <span className="group">
           <kbd>j</kbd>

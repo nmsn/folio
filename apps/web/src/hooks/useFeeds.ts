@@ -8,10 +8,11 @@ export function useFeeds() {
 export function useCreateFeed() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (input: { name: string; url: string; description?: string; category?: string }) =>
+    mutationFn: (input: { url: string; name?: string; description?: string; category?: string }) =>
       client.feeds.create(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.feeds.key() })
+      queryClient.invalidateQueries({ queryKey: orpc.articles.key() })
     },
   })
 }
