@@ -22,6 +22,8 @@ const PROJECT_NAME = 'folio'
 
 const app = await alchemy(`${PROJECT_NAME}-api`, {
   stateStore,
+  // Required to encrypt alchemy.secret() values in local state
+  password: process.env.ALCHEMY_PASSWORD || 'local-dev-alchemy-password',
 })
 
 const KV = await KVNamespace('KV', {
@@ -57,34 +59,40 @@ const AI_QUEUE = await Queue('AI_QUEUE', {
 })
 
 const hasR2Keys = !!process.env.R2_ACCESS_KEY_ID && !!process.env.R2_SECRET_ACCESS_KEY
+// R2 is optional for local RSS MVP — Cloudflare accounts must enable R2 in the dashboard first.
+const enableR2 = process.env.ENABLE_R2 === 'true' || hasR2Keys
 
 const bucketName = `${app.name}-bucket-${app.stage}`
 
-const BUCKET = await R2Bucket('BUCKET', {
-  name: bucketName,
-  locationHint: 'apac',
-  devDomain: true,
-  dev: {
-    remote: true,
-  },
-  cors: [
-    {
-      allowed: {
-        origins: (process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:3000')
-          .split(',')
-          .map((o) => o.trim()),
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD'],
-        headers: ['*'],
+const BUCKET = enableR2
+  ? await R2Bucket('BUCKET', {
+      name: bucketName,
+      locationHint: 'apac',
+      devDomain: true,
+      dev: {
+        remote: true,
       },
-    },
-  ],
-  delete: false,
-  empty: false,
-  adopt: true,
-})
+      cors: [
+        {
+          allowed: {
+            origins: (process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:3000')
+              .split(',')
+              .map((o) => o.trim()),
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD'],
+            headers: ['*'],
+          },
+        },
+      ],
+      delete: false,
+      empty: false,
+      adopt: true,
+    })
+  : undefined
 
-if (hasR2Keys) {
+if (BUCKET && hasR2Keys) {
   console.log('Your Bucket dev domain: ' + BUCKET.devDomain)
+} else if (!enableR2) {
+  console.log('R2 skipped (set ENABLE_R2=true after enabling R2 in Cloudflare Dashboard)')
 }
 
 export const server = await Worker('server', {
@@ -103,13 +111,13 @@ export const server = await Worker('server', {
     ),
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || 'http://localhost:4000',
     ANTHROPIC_API_KEY: alchemy.secret(process.env.ANTHROPIC_API_KEY || ''),
-    R2_PUBLIC_DOMAIN: BUCKET.devDomain || process.env.R2_PUBLIC_DOMAIN || '',
+    R2_PUBLIC_DOMAIN: BUCKET?.devDomain || process.env.R2_PUBLIC_DOMAIN || '',
     KV,
     DB,
     FEED_QUEUE,
     FULLTEXT_QUEUE,
     AI_QUEUE,
-    ...(hasR2Keys
+    ...(BUCKET && hasR2Keys
       ? {
           BUCKET,
           R2_ACCOUNT_ID: accountId,

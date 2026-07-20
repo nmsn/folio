@@ -37,6 +37,9 @@ pnpm-debug.log*
 # Testing
 coverage/
 
+# Alchemy local state
+.alchemy/
+
 # Turso
 *.db
 *.db-shm
