@@ -45,15 +45,14 @@ export function FolioArticleList({
   refreshing,
   feedNameMap,
 }: FolioArticleListProps) {
-  const filtered = useMemo(
-    () =>
-      articles.filter((a) => {
-        if (filter === 'unread' && isRead(a.id)) return false
-        if (filter === 'starred' && !isStarred(a.id)) return false
-        return true
-      }),
-    [articles, filter, isRead, isStarred],
-  )
+  const filtered = useMemo(() => {
+    const list = Array.isArray(articles) ? articles : []
+    return list.filter((a) => {
+      if (filter === 'unread' && isRead(a.id)) return false
+      if (filter === 'starred' && !isStarred(a.id)) return false
+      return true
+    })
+  }, [articles, filter, isRead, isStarred])
 
   const groups: DayGroup<ArticleItem>[] = useMemo(() => groupArticlesByDay(filtered), [filtered])
 
@@ -63,6 +62,58 @@ export function FolioArticleList({
   )
   const unreadInFiltered = filtered.filter((a) => !isRead(a.id)).length
   const starredInFiltered = filtered.filter((a) => isStarred(a.id)).length
+
+  const renderItem = (a: ArticleItem) => {
+    const read = isRead(a.id)
+    const starred = isStarred(a.id)
+    const feedName = a.sourceId ? feedNameMap[a.sourceId] : undefined
+    return (
+      <article
+        key={a.id}
+        className={`item ${selectedArticleId === a.id ? 'is-active' : ''} ${read ? 'is-read' : 'is-unread'}`}
+        data-state={read ? 'read' : 'unread'}
+        onClick={() => onSelect(a.id)}
+      >
+        <span className="unread" />
+        <div className="item-body">
+          <div className="item-meta">
+            <span className="src">{feedName ?? 'RSS'}</span>
+            {a.author && (
+              <>
+                <span className="dot" />
+                <span>{a.author}</span>
+              </>
+            )}
+          </div>
+          <h3 className="item-title">{a.title}</h3>
+          {a.description && <p className="item-excerpt">{a.description}</p>}
+        </div>
+        <div className="item-aside">
+          <span className="item-time">{formatRelativeTime(a.publishedAt)}</span>
+          <button
+            className={`item-star ${starred ? 'is-on' : ''}`}
+            title={starred ? '已收藏' : '收藏'}
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleStar(a.id)
+            }}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill={starred ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </button>
+        </div>
+      </article>
+    )
+  }
 
   return (
     <section className="col col-list">
@@ -119,65 +170,18 @@ export function FolioArticleList({
               {refreshing ? '刷新中…' : '刷新订阅源'}
             </button>
           </div>
-        ) : (
+        ) : groups.length > 0 ? (
           <>
             {groups.map((g) => (
               <div key={g.label}>
                 <div className="day-sep">{g.label}</div>
-                {g.items.map((a) => {
-                  const read = isRead(a.id)
-                  const starred = isStarred(a.id)
-                  const feedName = a.sourceId ? feedNameMap[a.sourceId] : undefined
-                  return (
-                    <article
-                      key={a.id}
-                      className={`item ${selectedArticleId === a.id ? 'is-active' : ''} ${read ? 'is-read' : 'is-unread'}`}
-                      data-state={read ? 'read' : 'unread'}
-                      onClick={() => onSelect(a.id)}
-                    >
-                      <span className="unread" />
-                      <div className="item-body">
-                        <div className="item-meta">
-                          <span className="src">{feedName ?? 'RSS'}</span>
-                          {a.author && (
-                            <>
-                              <span className="dot" />
-                              <span>{a.author}</span>
-                            </>
-                          )}
-                        </div>
-                        <h3 className="item-title">{a.title}</h3>
-                        {a.description && <p className="item-excerpt">{a.description}</p>}
-                      </div>
-                      <div className="item-aside">
-                        <span className="item-time">{formatRelativeTime(a.publishedAt)}</span>
-                        <button
-                          className={`item-star ${starred ? 'is-on' : ''}`}
-                          title={starred ? '已收藏' : '收藏'}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onToggleStar(a.id)
-                          }}
-                        >
-                          <svg
-                            viewBox="0 0 24 24"
-                            fill={starred ? 'currentColor' : 'none'}
-                            stroke="currentColor"
-                            strokeWidth="1.6"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
-                          >
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                          </svg>
-                        </button>
-                      </div>
-                    </article>
-                  )
-                })}
+                {g.items.map((a) => renderItem(a))}
               </div>
             ))}
           </>
+        ) : (
+          // Fallback if date grouping dropped everything
+          <>{filtered.map((a) => renderItem(a))}</>
         )}
       </div>
     </section>

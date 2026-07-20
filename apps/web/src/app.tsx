@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { FolioThreeColumnLayout } from './components/FolioThreeColumnLayout'
 import { useFeeds, useCreateFeed, useRefreshFeed } from './hooks/useFeeds'
@@ -30,6 +30,13 @@ function ReaderApp() {
   const [filter, setFilter] = useState<'all' | 'unread' | 'starred'>('all')
   const [showAddFeed, setShowAddFeed] = useState(false)
   const [addFeedError, setAddFeedError] = useState<string | null>(null)
+
+  // Auto-select first feed so the article list populates after subscribe / reload
+  useEffect(() => {
+    if (selectedFeedId) return
+    if (feeds.length === 0) return
+    setSelectedFeedId(feeds[0].id)
+  }, [feeds, selectedFeedId])
 
   const {
     data: articles = [],

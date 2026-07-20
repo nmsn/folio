@@ -4,7 +4,7 @@ import { orpc } from '../lib/orpc'
 export function useArticles(sourceId?: string) {
   return useQuery({
     ...orpc.articles.bySource.queryOptions({
-      input: { sourceId: sourceId!, limit: 20, offset: 0 },
+      input: { sourceId: sourceId!, limit: 50, offset: 0 },
     }),
     enabled: !!sourceId,
   })

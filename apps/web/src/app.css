@@ -116,10 +116,8 @@
 }
 @media (max-width: 1100px) {
   .folio-app {
-    grid-template-columns: var(--col-nav) 1fr;
-  }
-  .folio-app > .col-list {
-    display: none;
+    /* Keep article list visible; shrink columns instead of hiding. */
+    grid-template-columns: 220px minmax(260px, 320px) 1fr;
   }
 }
 @media (max-width: 720px) {
