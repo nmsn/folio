@@ -28,13 +28,14 @@ export default createApp({
   server: {
     compatibilityDate: '2026-06-06',
     // Alchemy / @folio/server local default (alchemy.run.ts listen port)
+    // Include /rpc in target: Nitro/Vinxi strips the matched `/rpc` prefix when proxying.
     devProxy: {
       '/rpc': {
-        target: 'http://localhost:4000',
+        target: 'http://localhost:4000/rpc',
         changeOrigin: true,
       },
       '/api/auth': {
-        target: 'http://localhost:4000',
+        target: 'http://localhost:4000/api/auth',
         changeOrigin: true,
       },
     },

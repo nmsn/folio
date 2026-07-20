@@ -5,8 +5,9 @@ import type { AppRouterClient } from '@folio/api'
 
 function getApiBase() {
   // Prefer VITE_API_URL; in browser default to same-origin so Vinxi devProxy works.
+  // Must be an absolute URL: @orpc/client does `new URL(baseUrl)` which throws on relative paths.
   if (typeof window !== 'undefined') {
-    return (import.meta as { env?: Record<string, string> }).env?.VITE_API_URL || ''
+    return (import.meta as { env?: Record<string, string> }).env?.VITE_API_URL || window.location.origin
   }
   return process.env.VITE_API_URL || process.env.API_URL || 'http://localhost:4000'
 }
